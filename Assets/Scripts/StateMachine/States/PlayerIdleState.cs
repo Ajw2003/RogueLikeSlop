@@ -1,3 +1,4 @@
+using Code.Scripts.EventSystems;
 using StateMachine;
 using UnityEngine;
 
@@ -13,5 +14,7 @@ public class PlayerIdleState : PlayerState
         //enable attack keybind
         //enable dodge keybind
         //enable input for run
+        Debug.Log("Entering PlayerIdleState");
+        EventManager.Instance?.Publish(new PlayerIdleEvent());
     }
 }

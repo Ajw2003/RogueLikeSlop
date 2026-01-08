@@ -17,6 +17,12 @@ namespace StateMachine
         public PlayerDodgeState DodgeState { get; set; }
         public PlayerRespawnState RespawnState { get; set; }
         public PlayerIdleState IdleState { get; set; }
+        
+        public Vector2 MovementDirection { get; set; }
+
+        private Rigidbody _rb;
+        
+        public float walkSpeed;
 
         public override void ChangeState(IState newState)
         {
@@ -39,7 +45,8 @@ namespace StateMachine
             DodgeState = new PlayerDodgeState(this);
             RespawnState = new PlayerRespawnState(this);
             IdleState = new PlayerIdleState(this);
-            
+            _rb = GetComponent<Rigidbody>();
+
         }
 
         private void Start()
@@ -47,42 +54,48 @@ namespace StateMachine
             ChangeState(IdleState);
         }
 
-        private void Walk()
+        public void Walk()
         {
             ChangeState(WalkState);
         }
+
+        public void Move(Vector2 movement)
+        {
+            MovementDirection = movement;
+            _rb.linearVelocity = movement * walkSpeed;
+        }
         
-        private void Run()
+        public void Run()
         {
             ChangeState(RunState);
         }
 
-        private void Dodge()
+        public void Dodge()
         {
             ChangeState(DodgeState);
         }
 
-        private void Respawn()
+        public void Respawn()
         {
             ChangeState(RespawnState);
         }
 
-        private void Dead()
+        public void Dead()
         {
             ChangeState(DeadState);
         }
         
-        private void Idle()
+        public void Idle()
         {
             ChangeState(IdleState);
         }
 
-        private void Attack()
+        public void Attack()
         {
             ChangeState(AttackState);
         }
 
-        private void Invunerable()
+        public void Invunerable()
         {
             ChangeState(InvunerableState);
         }
