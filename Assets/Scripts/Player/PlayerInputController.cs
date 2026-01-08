@@ -26,13 +26,31 @@ namespace Player
            {
                case true:
                    // sub to walk logic 
+                   _input.PlayerActions.Move.started += OnMovePerformed;
                    _input.PlayerActions.Move.performed += OnMovePerformed;
+                   _input.PlayerActions.Move.canceled += OnMoveCanceled;
                    Debug.Log("MoveSubbed");
                return;
                case false:
                    //un sub from walk logic
+                   _input.PlayerActions.Move.started -= OnMovePerformed;
+                   _input.PlayerActions.Move.performed -= OnMovePerformed;
+                   _input.PlayerActions.Move.canceled -= OnMoveCanceled;
                return;
            }
+       }
+       
+       private void OnMovePerformed(InputAction.CallbackContext context)
+       {
+           _stateMachine.ChangeState(_stateMachine.WalkState);
+           _stateMachine.Move(context.ReadValue<Vector2>());
+           Debug.Log(context);
+       }
+       
+       private void OnMoveCanceled(InputAction.CallbackContext context)
+       {
+           _stateMachine.Move(Vector2.zero);
+           Debug.Log("MoveCanceled");
        }
 
        private void SprintInputs(bool enable)
@@ -87,7 +105,7 @@ namespace Player
            {
                case true:
                    // sub to Jump logic 
-                   _input.PlayerActions.Move.performed += OnMovePerformed;
+                   _input.PlayerActions.Move.performed += OnJumpPerformed;
                    return;
                case false:
                    //un sub from Jump logic
@@ -95,12 +113,11 @@ namespace Player
            }
        }
 
-       private void OnMovePerformed(InputAction.CallbackContext context)
+       private void OnJumpPerformed(InputAction.CallbackContext context)
        {
-           _stateMachine.Move(context.ReadValue<Vector2>());
-           Debug.Log(context);
+           
        }
-
+       
        private void DodgeInputs(bool enable)
        {
            switch (enable)
@@ -135,6 +152,7 @@ namespace Player
 
        private void EnableAllInputs()
        {
+           _input.PlayerActions.Enable();
            WalkInputs(true);
            SprintInputs(true);
            InteractInputs(true);

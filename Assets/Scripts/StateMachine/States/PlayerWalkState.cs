@@ -17,6 +17,11 @@ public class PlayerWalkState : PlayerState
         //Call Walking movement logic here
         //Update direction based on keypress
     }
+    
+    public override void FixedUpdate()
+    {
+        _stateMachine._rb.linearVelocity = new Vector3(_stateMachine.MovementDirection.x, _stateMachine._rb.linearVelocity.y, _stateMachine.MovementDirection.y) * _stateMachine.walkSpeed;
+    }
 
     public override void Exit()
     {

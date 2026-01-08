@@ -20,7 +20,7 @@ namespace StateMachine
         
         public Vector2 MovementDirection { get; set; }
 
-        private Rigidbody _rb;
+        public Rigidbody _rb;
         
         public float walkSpeed;
 
@@ -62,7 +62,6 @@ namespace StateMachine
         public void Move(Vector2 movement)
         {
             MovementDirection = movement;
-            _rb.linearVelocity = movement * walkSpeed;
         }
         
         public void Run()
