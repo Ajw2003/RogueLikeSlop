@@ -1,32 +1,60 @@
 using StateMachine;
 using UnityEngine;
 
-public class PlayerJumpState : PlayerState 
+public class PlayerJumpState : PlayerState
 {
+    private float horizontalSpeed;
+
     public PlayerJumpState(PlayerStateMachine stateMachine) : base(stateMachine)
     {
     }
 
     public override void Enter()
     {
-        //apply force upwards and in direction facing 
-        //set in air bool to true
+        // Apply the jump force upward
+        Vector3 jumpVector = Vector3.up * _stateMachine.JumpForce;
+        _stateMachine._rb.AddForce(jumpVector, ForceMode.Impulse);
+
+        // Store the current horizontal speed for movement during jump
+        horizontalSpeed = _stateMachine.walkSpeed * 0.7f;
     }
 
-    public override void Update()
+    public override void FixedUpdate()
     {
-        //if(in air)
+        HandleHorizontalMovement();
+
+        if (_stateMachine.IsGrounded)
         {
-            //call ground detection logic here
-            //once ground hit after jump //set in air to false
-            //Call Exit
+            Exit();
         }
-        
+    }
+    
+    private void HandleHorizontalMovement()
+    {
+        // Preserve the current Y (vertical) velocity
+        float currentVerticalVelocity = _stateMachine._rb.linearVelocity.y;
+
+        // Calculate new horizontal velocity based on input
+        Vector3 targetVelocity = new Vector3(
+            _stateMachine.MovementDirection.x * horizontalSpeed,
+            currentVerticalVelocity,
+            _stateMachine.MovementDirection.y * horizontalSpeed
+        );
+
+        // Apply the new velocity while preserving the Y component from jumping physics
+        _stateMachine._rb.linearVelocity = targetVelocity;
     }
 
     public override void Exit()
     {
-        //re-enable main inputs jump/walk/run/attack/dodge
-        //don't force state change
+        // Check if there's movement input to transition to WalkState, otherwise IdleState
+        if (_stateMachine.MovementDirection.sqrMagnitude > 0.1f)
+        {
+            _stateMachine.ChangeState(_stateMachine.WalkState);
+        }
+        else
+        {
+            _stateMachine.ChangeState(_stateMachine.IdleState);
+        }
     }
 }

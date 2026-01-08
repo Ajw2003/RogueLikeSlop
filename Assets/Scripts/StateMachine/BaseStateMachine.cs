@@ -12,8 +12,7 @@ namespace StateMachine
         {
             if (newState == CurrentState)
                 return;
-                
-            CurrentState?.Exit();
+            
             CurrentState = newState;
             CurrentState?.Enter();
             CurrentStateName = CurrentState?.ToString();

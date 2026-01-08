@@ -20,7 +20,15 @@ public class PlayerWalkState : PlayerState
     
     public override void FixedUpdate()
     {
-        _stateMachine._rb.linearVelocity = new Vector3(_stateMachine.MovementDirection.x, _stateMachine._rb.linearVelocity.y, _stateMachine.MovementDirection.y) * _stateMachine.walkSpeed;
+        // Preserve the Y (vertical) velocity to not interfere with jumping/falling physics
+        float currentVerticalVelocity = _stateMachine._rb.linearVelocity.y;
+
+        // Apply horizontal movement while preserving vertical velocity
+        _stateMachine._rb.linearVelocity = new Vector3(
+            _stateMachine.MovementDirection.x * _stateMachine.walkSpeed,
+            currentVerticalVelocity,
+            _stateMachine.MovementDirection.y * _stateMachine.walkSpeed
+        );
     }
 
     public override void Exit()

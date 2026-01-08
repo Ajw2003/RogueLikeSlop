@@ -105,7 +105,7 @@ namespace Player
            {
                case true:
                    // sub to Jump logic 
-                   _input.PlayerActions.Move.performed += OnJumpPerformed;
+                   _input.PlayerActions.Jump.performed += OnJumpPerformed;
                    return;
                case false:
                    //un sub from Jump logic
@@ -115,7 +115,9 @@ namespace Player
 
        private void OnJumpPerformed(InputAction.CallbackContext context)
        {
-           
+           Debug.Log("Jump input detected!");
+           _stateMachine.Jump();
+           Debug.Log(context);
        }
        
        private void DodgeInputs(bool enable)

@@ -18,11 +18,17 @@ namespace StateMachine
         public PlayerRespawnState RespawnState { get; set; }
         public PlayerIdleState IdleState { get; set; }
         
+        public PlayerJumpState JumpState { get; set; }
+        
         public Vector2 MovementDirection { get; set; }
 
         public Rigidbody _rb;
         
         public float walkSpeed;
+
+        public float JumpForce;
+
+        public bool IsGrounded;
 
         public override void ChangeState(IState newState)
         {
@@ -45,6 +51,7 @@ namespace StateMachine
             DodgeState = new PlayerDodgeState(this);
             RespawnState = new PlayerRespawnState(this);
             IdleState = new PlayerIdleState(this);
+            JumpState = new PlayerJumpState(this);
             _rb = GetComponent<Rigidbody>();
 
         }
@@ -87,6 +94,25 @@ namespace StateMachine
         public void Idle()
         {
             ChangeState(IdleState);
+        }
+
+        public void Jump()
+        {
+            // Only allow jumping if grounded and not already in the jump state
+            if (IsGrounded && CurrentState != JumpState)
+            {
+                ChangeState(JumpState);
+            }
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            IsGrounded = true;
+        }
+
+        private void OnTriggerExit(Collider other)
+        {
+            IsGrounded = false;
         }
 
         public void Attack()
