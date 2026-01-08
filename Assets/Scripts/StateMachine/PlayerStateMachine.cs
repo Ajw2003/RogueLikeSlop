@@ -28,6 +28,8 @@ namespace StateMachine
 
         public float JumpForce;
 
+        public float DodgeForce;
+        
         public bool IsGrounded;
 
         public override void ChangeState(IState newState)
@@ -78,7 +80,10 @@ namespace StateMachine
 
         public void Dodge()
         {
-            ChangeState(DodgeState);
+            if (CurrentState != DodgeState)
+            {
+                ChangeState(DodgeState);
+            }
         }
 
         public void Respawn()

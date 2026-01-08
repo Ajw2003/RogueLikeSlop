@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace StateMachine.States
 {
     public class PlayerDodgeState : PlayerState
@@ -8,16 +10,28 @@ namespace StateMachine.States
         
         public override void Enter()
         {
-            //disable any other input but pause
+            Vector3 dodgeVector = new Vector3(_stateMachine.MovementDirection.x, 0, _stateMachine.MovementDirection.y ) * _stateMachine.DodgeForce;
+            _stateMachine._rb.AddForce(dodgeVector, ForceMode.Impulse); 
         }
+
+        public override void FixedUpdate()
+        {
+            if (_stateMachine._rb.linearVelocity.magnitude < 1.0f)
+            {
+                Exit();
+            }
+        }
+
         public override void Exit()
         {
-            //re enable input for dodge
-            //re enable input for attack
-            // re enable input for walk
-            //re enable input for run
-            
-            //don't force state transfer just allow it to happen
+            if (_stateMachine.MovementDirection.sqrMagnitude > 0.1f)
+            {
+                _stateMachine.ChangeState(_stateMachine.WalkState);
+            }
+            else
+            {
+                _stateMachine.ChangeState(_stateMachine.IdleState);
+            }
         }
     }
 }

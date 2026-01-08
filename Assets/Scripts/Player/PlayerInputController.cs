@@ -109,6 +109,7 @@ namespace Player
                    return;
                case false:
                    //un sub from Jump logic
+                   _input.PlayerActions.Jump.performed -= OnJumpPerformed;
                    return;
            }
        }
@@ -125,12 +126,20 @@ namespace Player
            switch (enable)
            {
                case true:
+                   _input.PlayerActions.Dodge.performed += OnDodgePerformed;
                    // sub to Dodge logic 
                    return;
                case false:
                    //un sub from Dodge logic
+                   _input.PlayerActions.Dodge.performed -= OnDodgePerformed;
                    return;
            }
+       }
+
+       private void OnDodgePerformed(InputAction.CallbackContext context)
+       {
+           _stateMachine.Dodge();
+           Debug.Log(context);
        }
 
        private void PlayerDied()
