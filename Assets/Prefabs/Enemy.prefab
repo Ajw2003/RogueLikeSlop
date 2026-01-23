@@ -144,6 +144,7 @@ MonoBehaviour:
   AttackRange: 1.5
   AttackRate: 1.5
   maxHealth: 100
+  ShowDebugGizmos: 0
 --- !u!195 &2495562083171233322
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -235,3 +236,4 @@ MonoBehaviour:
   monsterStateMachine: {fileID: 3196065196339307885}
   activationRadius: 15
   deactivationRadius: 20
+  showDebugGizmos: 0

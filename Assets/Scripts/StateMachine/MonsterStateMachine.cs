@@ -169,8 +169,13 @@ public class MonsterStateMachine : BaseStateMachine
         return false;
     }
 
+    [Header("Debug")]
+    public bool ShowDebugGizmos = false;
+
     private void OnDrawGizmosSelected()
     {
+        if (!ShowDebugGizmos) return;
+
         // Visualize Attack Range
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, AttackRange);
@@ -193,7 +198,8 @@ public class MonsterStateMachine : BaseStateMachine
             Gizmos.color = Color.green;
             for (int i = 0; i < PatrolPoints.Count; i++)
             {
-                Gizmos.DrawSphere(PatrolPoints[i], 0.3f);
+                // Use WireCube instead of Sphere (WireCube is much cheaper to render)
+                Gizmos.DrawWireCube(PatrolPoints[i], Vector3.one * 0.5f);
                 if (i < PatrolPoints.Count - 1)
                     Gizmos.DrawLine(PatrolPoints[i], PatrolPoints[i + 1]);
                 else

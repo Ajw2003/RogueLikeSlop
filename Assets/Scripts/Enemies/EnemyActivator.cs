@@ -14,6 +14,9 @@ public class EnemyActivator : MonoBehaviour
     [Tooltip("Distance at which the enemy deactivates.")]
     public float deactivationRadius = 30f;
 
+    [Header("Debug")]
+    public bool showDebugGizmos = false;
+
     private SphereCollider _activationTrigger;
     private Transform _playerTransform;
     private bool _isActive = false;
@@ -83,6 +86,8 @@ public class EnemyActivator : MonoBehaviour
     // Helper to visualize the radius in the editor
     private void OnDrawGizmosSelected()
     {
+        if (!showDebugGizmos) return;
+
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, activationRadius);
 
