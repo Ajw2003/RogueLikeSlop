@@ -23,14 +23,19 @@ namespace StateMachine
         public Vector2 MovementDirection { get; set; }
 
         public Rigidbody _rb;
-        
+
         public float walkSpeed;
 
         public float JumpForce;
 
         public float DodgeForce;
         
+        public float MouseSensitivity = 100f;
+        public Transform CameraTransform;
+        
         public bool IsGrounded;
+
+        private float _xRotation = 0f;
 
         public override void ChangeState(IState newState)
         {
@@ -41,6 +46,24 @@ namespace StateMachine
             Debug.Log($"Previous State: {PreviousState}");
             base.ChangeState(newState);
             Debug.Log($"State Changed to: {CurrentState}");
+        }
+
+        public void Look(Vector2 lookDelta)
+        {
+            if (CameraTransform == null)
+            {
+                Debug.LogWarning("CameraTransform is not assigned in PlayerStateMachine.");
+                return;
+            }
+
+            float mouseX = lookDelta.x * MouseSensitivity * Time.deltaTime;
+            float mouseY = lookDelta.y * MouseSensitivity * Time.deltaTime;
+
+            _xRotation -= mouseY;
+            _xRotation = Mathf.Clamp(_xRotation, -90f, 90f);
+
+            CameraTransform.localRotation = Quaternion.Euler(_xRotation, 0f, 0f);
+            transform.Rotate(Vector3.up * mouseX);
         }
 
         public void Awake()
@@ -111,6 +134,11 @@ namespace StateMachine
         }
 
         private void OnTriggerEnter(Collider other)
+        {
+            IsGrounded = true;
+        }
+
+        private void OnTriggerStay(Collider other)
         {
             IsGrounded = true;
         }

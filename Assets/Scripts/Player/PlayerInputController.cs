@@ -18,6 +18,12 @@ namespace Player
            }
            _stateMachine = GetComponent<PlayerStateMachine>();
            EventManager.Instance?.Subscribe(this, (PlayerIdleEvent e) => EnableAllInputs());
+           Cursor.lockState = CursorLockMode.Locked;
+       }
+
+       private void LateUpdate()
+       {
+           _stateMachine.Look(GetLookDelta());
        }
 
        private void WalkInputs(bool enable)
@@ -79,6 +85,7 @@ namespace Player
            }
        }
 
+       private Vector2 _lookDelta;
        private void AttackInputs(bool enable)
        {
            switch (enable)
@@ -142,6 +149,31 @@ namespace Player
            Debug.Log(context);
        }
 
+       private void LookInputs(bool enable)
+       {
+           switch (enable)
+           {
+               case true:
+                   _input.PlayerActions.Look.performed += OnLookPerformed;
+                   _input.PlayerActions.Look.canceled += OnLookPerformed; // Clear look delta when canceled
+                   return;
+               case false:
+                   _input.PlayerActions.Look.performed -= OnLookPerformed;
+                   _input.PlayerActions.Look.canceled -= OnLookPerformed;
+                   return;
+           }
+       }
+
+       private void OnLookPerformed(InputAction.CallbackContext context)
+       {
+           _lookDelta = context.ReadValue<Vector2>();
+       }
+
+       public Vector2 GetLookDelta()
+       {
+           return _lookDelta;
+       }
+
        private void PlayerDied()
        {
            DisableAllInputs();
@@ -159,6 +191,7 @@ namespace Player
            DodgeInputs(false);
            JumpInputs(false);
            AttackInputs(false);
+           LookInputs(false);
        }
 
        private void EnableAllInputs()
@@ -170,6 +203,7 @@ namespace Player
            DodgeInputs(true);
            JumpInputs(true);
            AttackInputs(true);
+           LookInputs(true);
        }
     }
 }
