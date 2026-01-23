@@ -14,12 +14,6 @@ public class PlayerWalkState : PlayerState
 
     public override void Update()
     {
-        //Call Walking movement logic here
-        //Update direction based on keypress
-    }
-    
-    public override void FixedUpdate()
-    {
         if (_stateMachine.CameraTransform == null)
         {
             Debug.LogWarning("CameraTransform is not assigned in PlayerStateMachine. Cannot apply camera-relative movement.");
@@ -43,6 +37,11 @@ public class PlayerWalkState : PlayerState
             currentVerticalVelocity,
             moveDirection.z * _stateMachine.walkSpeed
         );
+    }
+    
+    public override void FixedUpdate()
+    {
+        
     }
 
     public override void Exit()

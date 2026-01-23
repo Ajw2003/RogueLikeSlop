@@ -10,7 +10,7 @@ namespace StateMachine.States
 
         public override void Enter()
         {
-            // Initial idle behavior (e.g., play idle animation)
+            _stateMachine.StopMoving();
         }
 
         public override void Update()

@@ -33,8 +33,8 @@ namespace StateMachine.States
             Vector3 targetPoint = _stateMachine.PatrolPoints[_stateMachine.CurrentPatrolPointIndex];
             _stateMachine.MoveTo(targetPoint);
 
-            // Check if reached current patrol point
-            if (Vector3.Distance(_stateMachine.transform.position, targetPoint) < _stateMachine.PatrolPointReachedThreshold)
+            // Check if reached current patrol point using the NavMesh optimized check
+            if (_stateMachine.HasReachedDestination())
             {
                 _stateMachine.CurrentPatrolPointIndex = (_stateMachine.CurrentPatrolPointIndex + 1) % _stateMachine.PatrolPoints.Count;
             }

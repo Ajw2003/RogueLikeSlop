@@ -1,6 +1,7 @@
 using StateMachine;
 using StateMachine.States;
 using UnityEngine;
+using UnityEngine.AI;
 using System.Collections.Generic;
 
 public class MonsterStateMachine : BaseStateMachine
@@ -9,12 +10,14 @@ public class MonsterStateMachine : BaseStateMachine
     public float MoveSpeed = 3f;
     public List<Vector3> PatrolPoints = new List<Vector3>();
     public int CurrentPatrolPointIndex = 0;
-    public float PatrolPointReachedThreshold = 0.1f;
+    public float PatrolPointReachedThreshold = 1.0f; // Increased for NavMesh precision
     
     [Header("Vision Cone Settings")]
     public float VisionRange = 10f;
-    public float VisionAngle = 90f; // Total angle, e.g., 90 means 45 degrees left and right of forward
-    public LayerMask VisionBlockingLayers; // Layers that can block line of sight
+    public float VisionAngle = 90f;
+    public LayerMask VisionBlockingLayers;
+
+    private NavMeshAgent _agent;
 
     // States
     public MonsterPatrolState PatrolState { get; private set; }
@@ -23,10 +26,12 @@ public class MonsterStateMachine : BaseStateMachine
 
     private void Awake()
     {
+        _agent = GetComponent<NavMeshAgent>();
+        _agent.speed = MoveSpeed;
+
         PatrolState = new MonsterPatrolState(this);
         PursueState = new MonsterPursueState(this);
         IdleState = new MonsterIdleState(this);
-        // Additional initialization if needed
     }
 
     private void Start()
@@ -65,9 +70,7 @@ public class MonsterStateMachine : BaseStateMachine
             float distanceToPlayer = Vector3.Distance(transform.position, PlayerTarget.position);
             if (distanceToPlayer < VisionRange)
             {
-                // Check for line of sight obstruction
                 RaycastHit hit;
-                // Offset raycast origin slightly so it doesn't hit the monster's own feet/ground
                 Vector3 rayOrigin = transform.position + Vector3.up * 1.5f; 
                 Vector3 rayDirection = (PlayerTarget.position + Vector3.up * 1.5f) - rayOrigin;
 
@@ -115,11 +118,25 @@ public class MonsterStateMachine : BaseStateMachine
 
     public void MoveTo(Vector3 targetPosition)
     {
-        // Simple movement for now, can be replaced by NavMeshAgent later
-        Vector3 direction = (targetPosition - transform.position).normalized;
-        transform.position += direction * MoveSpeed * Time.deltaTime;
-        // Rotate to face the target
-        Quaternion targetRotation = Quaternion.LookRotation(direction);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 5f); // Smooth rotation
+        if (_agent != null && _agent.isOnNavMesh)
+        {
+            _agent.SetDestination(targetPosition);
+        }
+    }
+
+    public void StopMoving()
+    {
+        if (_agent != null && _agent.isOnNavMesh)
+        {
+            _agent.ResetPath();
+        }
+    }
+
+    public bool HasReachedDestination()
+    {
+        if (_agent == null || !_agent.isOnNavMesh) return false;
+        
+        // Check if the agent is close enough to the target and has no path pending
+        return !_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance + PatrolPointReachedThreshold;
     }
 }

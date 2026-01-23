@@ -1,3 +1,4 @@
+using System;
 using Code.Scripts.EventSystems;
 using StateMachine;
 using UnityEngine;
@@ -22,6 +23,11 @@ namespace Player
        }
 
        private void LateUpdate()
+       {
+           
+       }
+
+       private void Update()
        {
            _stateMachine.Look(GetLookDelta());
        }
