@@ -50,6 +50,8 @@ public class MonsterStateMachine : BaseStateMachine
         _health =  maxHealth;
     }
 
+    private bool _hasActivated = false;
+
     private void Start()
     {
         // Automatically find player if not assigned
@@ -61,9 +63,14 @@ public class MonsterStateMachine : BaseStateMachine
                 PlayerTarget = player.transform;
             }
         }
+    }
+
+    public void Activate()
+    {
+        if (_hasActivated) return;
+        _hasActivated = true;
 
         GeneratePatrolPoints();
-
         ChangeState(PatrolState);
     }
 
