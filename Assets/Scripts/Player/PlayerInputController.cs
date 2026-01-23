@@ -56,13 +56,13 @@ namespace Player
        {
            _stateMachine.ChangeState(_stateMachine.WalkState);
            _stateMachine.Move(context.ReadValue<Vector2>());
-           Debug.Log(context);
+           //Debug.Log(context);
        }
        
        private void OnMoveCanceled(InputAction.CallbackContext context)
        {
            _stateMachine.Move(Vector2.zero);
-           Debug.Log("MoveCanceled");
+           //Debug.Log("MoveCanceled");
        }
 
        private void SprintInputs(bool enable)
@@ -109,6 +109,7 @@ namespace Player
 
        private void OnAttackPerformed(InputAction.CallbackContext context)
        {
+           _stateMachine.Attack();
            EventManager.Instance?.Publish(new PlayerAttackEvent ());
        }
 
@@ -129,9 +130,9 @@ namespace Player
 
        private void OnJumpPerformed(InputAction.CallbackContext context)
        {
-           Debug.Log("Jump input detected!");
+           //Debug.Log("Jump input detected!");
            _stateMachine.Jump();
-           Debug.Log(context);
+           //Debug.Log(context);
        }
        
        private void DodgeInputs(bool enable)

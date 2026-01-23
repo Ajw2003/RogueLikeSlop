@@ -25,6 +25,13 @@ namespace StateMachine.States
             // Pursue logic: move towards the player
             if (_stateMachine.PlayerTarget != null)
             {
+                float distance = Vector3.Distance(_stateMachine.transform.position, _stateMachine.PlayerTarget.position);
+                if (distance <= _stateMachine.AttackRange)
+                {
+                    _stateMachine.ChangeState(_stateMachine.AttackState);
+                    return;
+                }
+
                 _stateMachine.MoveTo(_stateMachine.PlayerTarget.position);
             }
             else

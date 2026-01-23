@@ -1,10 +1,11 @@
 using System;
 using StateMachine.States;
 using UnityEngine;
+using Interfaces;
 
 namespace StateMachine
 {
-    public class PlayerStateMachine : BaseStateMachine
+    public class PlayerStateMachine : BaseStateMachine, IDamageable
     {
         
         public PlayerState PreviousState { get; set; }
@@ -33,9 +34,16 @@ namespace StateMachine
         public float MouseSensitivity = 100f;
         public Transform CameraTransform;
         
+        [Header("Combat Settings")]
+        public Transform AttackPoint;
+        public float AttackRange = 0.5f;
+        public float AttackDamage = 10f;
+        public LayerMask EnemyLayers;
+
         public bool IsGrounded;
 
         private float _xRotation = 0f;
+        private Health _health;
 
         public override void ChangeState(IState newState)
         {
@@ -66,8 +74,22 @@ namespace StateMachine
             transform.Rotate(Vector3.up * mouseX);
         }
 
+        private void OnDrawGizmosSelected()
+        {
+            if (AttackPoint == null)
+                return;
+
+            Gizmos.DrawWireSphere(AttackPoint.position, AttackRange);
+        }
+
         public void Awake()
         {
+            _health = GetComponent<Health>();
+            if (_health != null)
+            {
+                _health.OnDeath += Die;
+            }
+
             RunState = new PlayerRunState(this);
             InvunerableState = new PlayerInvunerableState(this);
             WalkState = new PlayerWalkState(this);
@@ -84,6 +106,20 @@ namespace StateMachine
         private void Start()
         {
             ChangeState(IdleState);
+            
+        }
+
+        public void TakeDamage(float damage)
+        {
+            Debug.Log($"TakeDamage: {damage}");
+            if (CurrentState == InvunerableState) return;
+            
+            _health?.TakeDamage(damage);
+        }
+
+        public void Die()
+        {
+            ChangeState(DeadState);
         }
 
         public void Walk()
@@ -111,6 +147,7 @@ namespace StateMachine
 
         public void Respawn()
         {
+            _health?.ResetHealth();
             ChangeState(RespawnState);
         }
 

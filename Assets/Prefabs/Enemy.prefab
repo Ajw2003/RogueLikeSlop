@@ -13,7 +13,8 @@ GameObject:
   - component: {fileID: 3094271607203554257}
   - component: {fileID: 63036775684390452}
   - component: {fileID: 3196065196339307885}
-  m_Layer: 0
+  - component: {fileID: 2495562083171233322}
+  m_Layer: 6
   m_Name: Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -28,7 +29,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1953330812149981427}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.075, z: 3.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -129,9 +130,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MonsterStateMachine
   MoveSpeed: 3
   PatrolPoints:
-  - {x: 3, y: 0, z: 14.31}
-  - {x: -2.54, y: 0, z: 1.53}
-  - {x: 12.96, y: 0, z: 0}
+  - {x: -17.3, y: 0.61, z: 13.1}
+  - {x: -3.35, y: 0.47, z: -15.1}
+  - {x: 19, y: 0.37, z: 0}
   CurrentPatrolPointIndex: 0
   PatrolPointReachedThreshold: 0.1
   VisionRange: 10
@@ -139,3 +140,28 @@ MonoBehaviour:
   VisionBlockingLayers:
     serializedVersion: 2
     m_Bits: 0
+  AttackDamage: 10
+  AttackRange: 1.5
+  AttackRate: 1.5
+--- !u!195 &2495562083171233322
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1953330812149981427}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 1
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4

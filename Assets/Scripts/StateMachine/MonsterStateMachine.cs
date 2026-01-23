@@ -3,8 +3,9 @@ using StateMachine.States;
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections.Generic;
+using Interfaces;
 
-public class MonsterStateMachine : BaseStateMachine
+public class MonsterStateMachine : BaseStateMachine, IDamageable
 {
     public Transform PlayerTarget { get; set; }
     public float MoveSpeed = 3f;
@@ -17,21 +18,37 @@ public class MonsterStateMachine : BaseStateMachine
     public float VisionAngle = 90f;
     public LayerMask VisionBlockingLayers;
 
+    [Header("Combat Settings")]
+    public float AttackDamage = 10f;
+    public float AttackRange = 1.5f;
+    public float AttackRate = 1.5f; // Seconds between attacks
+
     private NavMeshAgent _agent;
+    private Health _health;
 
     // States
     public MonsterPatrolState PatrolState { get; private set; }
     public MonsterPursueState PursueState { get; private set; }
+    public MonsterAttackState AttackState { get; private set; }
     public MonsterIdleState IdleState { get; private set; }
+    public MonsterDeadState DeadState { get; private set; }
 
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
         _agent.speed = MoveSpeed;
 
+        _health = GetComponent<Health>();
+        if (_health != null)
+        {
+            _health.OnDeath += Die;
+        }
+
         PatrolState = new MonsterPatrolState(this);
         PursueState = new MonsterPursueState(this);
+        AttackState = new MonsterAttackState(this);
         IdleState = new MonsterIdleState(this);
+        DeadState = new MonsterDeadState(this); // Initialize DeadState
     }
 
     private void Start()
@@ -56,6 +73,16 @@ public class MonsterStateMachine : BaseStateMachine
 
         base.ChangeState(newState);
         Debug.Log($"Monster State Changed to: {CurrentState.GetType().Name}");
+    }
+
+    public void TakeDamage(float damage)
+    {
+        _health?.TakeDamage(damage);
+    }
+
+    public void Die()
+    {
+        ChangeState(DeadState); // Transition to DeadState instead of destroying immediately
     }
 
     public bool CanSeePlayer()
@@ -89,6 +116,10 @@ public class MonsterStateMachine : BaseStateMachine
 
     private void OnDrawGizmosSelected()
     {
+        // Visualize Attack Range
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, AttackRange);
+
         // Visualize Vision Cone
         Gizmos.color = Color.yellow;
         Vector3 forward = transform.forward * VisionRange;
