@@ -4,6 +4,7 @@ using UnityEngine;
 public class PlayerJumpState : PlayerState
 {
     private float horizontalSpeed;
+    private float _jumpTime;
 
     public PlayerJumpState(PlayerStateMachine stateMachine) : base(stateMachine)
     {
@@ -17,13 +18,15 @@ public class PlayerJumpState : PlayerState
 
         // Store the current horizontal speed for movement during jump
         horizontalSpeed = _stateMachine.walkSpeed * 0.7f;
+        _jumpTime = Time.time;
     }
 
     public override void FixedUpdate()
     {
         HandleHorizontalMovement();
 
-        if (_stateMachine.IsGrounded)
+        // Add a small grace period before checking grounded to ensure we've actually left the ground
+        if (Time.time > _jumpTime + 0.2f && _stateMachine.IsGrounded)
         {
             Exit();
         }
@@ -34,12 +37,16 @@ public class PlayerJumpState : PlayerState
         // Preserve the current Y (vertical) velocity
         float currentVerticalVelocity = _stateMachine._rb.linearVelocity.y;
 
-        // Calculate new horizontal velocity based on input
-        Vector3 targetVelocity = new Vector3(
-            _stateMachine.MovementDirection.x * horizontalSpeed,
-            currentVerticalVelocity,
-            _stateMachine.MovementDirection.y * horizontalSpeed
-        );
+        // Calculate direction relative to player orientation
+        Vector3 inputDir = new Vector3(_stateMachine.MovementDirection.x, 0, _stateMachine.MovementDirection.y);
+        
+        // Normalize input if magnitude > 1 to prevent faster diagonal movement
+        if (inputDir.sqrMagnitude > 1f) inputDir.Normalize();
+
+        Vector3 moveDir = _stateMachine.transform.TransformDirection(inputDir);
+
+        Vector3 targetVelocity = moveDir * horizontalSpeed;
+        targetVelocity.y = currentVerticalVelocity;
 
         // Apply the new velocity while preserving the Y component from jumping physics
         _stateMachine._rb.linearVelocity = targetVelocity;

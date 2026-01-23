@@ -4,6 +4,8 @@ namespace StateMachine.States
 {
     public class MonsterPatrolState : MonsterState
     {
+        private float _visionTimer;
+
         public MonsterPatrolState(MonsterStateMachine stateMachine) : base(stateMachine)
         {
         }
@@ -16,23 +18,28 @@ namespace StateMachine.States
                 return;
             }
 
+            _visionTimer = 0f;
             MoveToNextPoint();
         }
 
         public override void Update()
         {
-            // Check for player vision
-            if (_stateMachine.CanSeePlayer())
-            {
-                _stateMachine.ChangeState(_stateMachine.PursueState);
-                return;
-            }
-
             // Check if reached current patrol point using the NavMesh optimized check
             if (_stateMachine.HasReachedDestination())
             {
                 _stateMachine.CurrentPatrolPointIndex = (_stateMachine.CurrentPatrolPointIndex + 1) % _stateMachine.PatrolPoints.Count;
                 MoveToNextPoint();
+            }
+
+            _visionTimer += Time.deltaTime;
+            if (_visionTimer < 0.2f) return;
+            _visionTimer = 0f;
+
+            // Check for player vision
+            if (_stateMachine.CanSeePlayer())
+            {
+                _stateMachine.ChangeState(_stateMachine.PursueState);
+                return;
             }
         }
 

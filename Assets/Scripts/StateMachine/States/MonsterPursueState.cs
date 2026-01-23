@@ -4,41 +4,50 @@ namespace StateMachine.States
 {
     public class MonsterPursueState : MonsterState
     {
+        private float _repathTimer;
+
         public MonsterPursueState(MonsterStateMachine stateMachine) : base(stateMachine)
         {
         }
 
         public override void Enter()
         {
-            // Optionally set initial pursuit behavior
+            _repathTimer = 0f;
         }
 
         public override void Update()
         {
-            // If player leaves vision, switch back to patrol
+            // Check for attack range (responsive check every frame)
+            if (_stateMachine.PlayerTarget != null)
+            {
+                float sqrDistance = (_stateMachine.transform.position - _stateMachine.PlayerTarget.position).sqrMagnitude;
+                if (sqrDistance <= _stateMachine.AttackRange * _stateMachine.AttackRange)
+                {
+                    _stateMachine.ChangeState(_stateMachine.AttackState);
+                    return;
+                }
+            }
+            else
+            {
+                // Lost target
+                _stateMachine.ChangeState(_stateMachine.PatrolState);
+                return;
+            }
+
+            // Throttle pathfinding and vision checks to improve performance
+            _repathTimer += Time.deltaTime;
+            if (_repathTimer < 0.2f) return;
+            _repathTimer = 0f;
+
+            // Check vision
             if (!_stateMachine.CanSeePlayer())
             {
                 _stateMachine.ChangeState(_stateMachine.PatrolState);
                 return;
             }
 
-            // Pursue logic: move towards the player
-            if (_stateMachine.PlayerTarget != null)
-            {
-                float distance = Vector3.Distance(_stateMachine.transform.position, _stateMachine.PlayerTarget.position);
-                if (distance <= _stateMachine.AttackRange)
-                {
-                    _stateMachine.ChangeState(_stateMachine.AttackState);
-                    return;
-                }
-
-                _stateMachine.MoveTo(_stateMachine.PlayerTarget.position);
-            }
-            else
-            {
-                // If for some reason PlayerTarget is null while pursuing, go back to patrol
-                _stateMachine.ChangeState(_stateMachine.PatrolState);
-            }
+            // Update path
+            _stateMachine.MoveTo(_stateMachine.PlayerTarget.position);
         }
 
         public override void Exit()

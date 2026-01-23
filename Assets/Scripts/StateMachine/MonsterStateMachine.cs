@@ -65,6 +65,12 @@ public class MonsterStateMachine : BaseStateMachine
         }
     }
 
+    public override void Update()
+    {
+        if (!_isActive) return;
+        base.Update();
+    }
+
     public void Activate()
     {
         if (_isActive) return;
@@ -112,7 +118,7 @@ public class MonsterStateMachine : BaseStateMachine
             return;
 
         base.ChangeState(newState);
-        Debug.Log($"Monster State Changed to: {CurrentState.GetType().Name}");
+        // Debug.Log removed for performance
     }
 
     public void TakeDamage(float damage)
@@ -136,26 +142,28 @@ public class MonsterStateMachine : BaseStateMachine
     {
         if (PlayerTarget == null) return false;
 
-        Vector3 directionToPlayer = (PlayerTarget.position - transform.position).normalized;
-        float angleToPlayer = Vector3.Angle(transform.forward, directionToPlayer);
+        Vector3 offsetToPlayer = PlayerTarget.position - transform.position;
+        
+        // Optimization: Check squared distance first to avoid Sqrt and expensive Angle checks
+        if (offsetToPlayer.sqrMagnitude > VisionRange * VisionRange) return false;
 
-        if (angleToPlayer < VisionAngle / 2f)
+        // Now calculate angle
+        if (Vector3.Angle(transform.forward, offsetToPlayer) < VisionAngle / 2f)
         {
-            float distanceToPlayer = Vector3.Distance(transform.position, PlayerTarget.position);
-            if (distanceToPlayer < VisionRange)
-            {
-                RaycastHit hit;
-                Vector3 rayOrigin = transform.position + Vector3.up * 1.5f; 
-                Vector3 rayDirection = (PlayerTarget.position + Vector3.up * 1.5f) - rayOrigin;
+            // Finally perform Raycast
+            RaycastHit hit;
+            Vector3 rayOrigin = transform.position + Vector3.up * 1.5f; 
+            Vector3 rayDirection = (PlayerTarget.position + Vector3.up * 1.5f) - rayOrigin;
 
-                if (Physics.Raycast(rayOrigin, rayDirection.normalized, out hit, VisionRange, VisionBlockingLayers))
-                {
-                    return hit.collider.transform == PlayerTarget || hit.collider.transform.IsChildOf(PlayerTarget);
-                }
-                else
-                {
-                    return true;
-                }
+            if (Physics.Raycast(rayOrigin, rayDirection.normalized, out hit, VisionRange, VisionBlockingLayers))
+            {
+                return hit.collider.transform == PlayerTarget || hit.collider.transform.IsChildOf(PlayerTarget);
+            }
+            else
+            {
+                // If raycast didn't hit anything (e.g. inside trigger), assume visible or blocked? 
+                // Original logic returned true here. Sticking to original logic.
+                return true;
             }
         }
         return false;
