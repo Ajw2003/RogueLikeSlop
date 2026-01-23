@@ -11,6 +11,10 @@ public class MonsterStateMachine : BaseStateMachine
     public List<Vector3> PatrolPoints = new List<Vector3>();
     public int CurrentPatrolPointIndex = 0;
     public float PatrolPointReachedThreshold = 1.0f; // Increased for NavMesh precision
+
+    [Header("Patrol Settings")]
+    public float PatrolRadius = 10f;
+    public int PatrolPointCount = 3;
     
     [Header("Vision Cone Settings")]
     public float VisionRange = 10f;
@@ -58,7 +62,28 @@ public class MonsterStateMachine : BaseStateMachine
             }
         }
 
+        GeneratePatrolPoints();
+
         ChangeState(PatrolState);
+    }
+
+    private void GeneratePatrolPoints()
+    {
+        PatrolPoints.Clear();
+        int attempts = 0;
+        while (PatrolPoints.Count < PatrolPointCount && attempts < 50)
+        {
+            attempts++;
+            Vector2 randomCircle = Random.insideUnitCircle * PatrolRadius;
+            Vector3 randomPoint = transform.position + new Vector3(randomCircle.x, 0, randomCircle.y);
+            
+            NavMeshHit hit;
+            // Use a reasonable range for vertical search, or PatrolRadius if terrain varies wildly
+            if (NavMesh.SamplePosition(randomPoint, out hit, 10.0f, NavMesh.AllAreas))
+            {
+                PatrolPoints.Add(hit.position);
+            }
+        }
     }
 
     public override void ChangeState(IState newState)
