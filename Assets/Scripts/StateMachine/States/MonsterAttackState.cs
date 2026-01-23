@@ -1,5 +1,4 @@
 using UnityEngine;
-using Interfaces;
 
 namespace StateMachine.States
 {

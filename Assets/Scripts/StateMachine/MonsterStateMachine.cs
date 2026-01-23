@@ -3,9 +3,8 @@ using StateMachine.States;
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections.Generic;
-using Interfaces;
 
-public class MonsterStateMachine : BaseStateMachine, IDamageable
+public class MonsterStateMachine : BaseStateMachine
 {
     public Transform PlayerTarget { get; set; }
     public float MoveSpeed = 3f;
@@ -24,7 +23,8 @@ public class MonsterStateMachine : BaseStateMachine, IDamageable
     public float AttackRate = 1.5f; // Seconds between attacks
 
     private NavMeshAgent _agent;
-    private Health _health;
+    private float _health;
+    public float maxHealth = 100;
 
     // States
     public MonsterPatrolState PatrolState { get; private set; }
@@ -38,17 +38,12 @@ public class MonsterStateMachine : BaseStateMachine, IDamageable
         _agent = GetComponent<NavMeshAgent>();
         _agent.speed = MoveSpeed;
 
-        _health = GetComponent<Health>();
-        if (_health != null)
-        {
-            _health.OnDeath += Die;
-        }
-
         PatrolState = new MonsterPatrolState(this);
         PursueState = new MonsterPursueState(this);
         AttackState = new MonsterAttackState(this);
         IdleState = new MonsterIdleState(this);
         DeadState = new MonsterDeadState(this); // Initialize DeadState
+        _health =  maxHealth;
     }
 
     private void Start()
@@ -77,7 +72,14 @@ public class MonsterStateMachine : BaseStateMachine, IDamageable
 
     public void TakeDamage(float damage)
     {
-        _health?.TakeDamage(damage);
+        _health -= damage;
+        if(_health <= 0)
+            Die();
+    }
+
+    public void DestroySelf()
+    {
+        Destroy(this.gameObject);
     }
 
     public void Die()

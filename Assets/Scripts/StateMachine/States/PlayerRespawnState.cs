@@ -1,3 +1,6 @@
+using System;
+using System.Threading.Tasks;
+
 namespace StateMachine.States
 {
     public class PlayerRespawnState : PlayerState
@@ -10,6 +13,12 @@ namespace StateMachine.States
         {
             // Respawn Logic here
             // Disable All movement and make player invunerable 
+            _stateMachine.dead = false;
+            Task.Run(async () =>
+            {
+                await Task.Delay(TimeSpan.FromSeconds(_stateMachine.respawnSpeed));
+                Exit();
+            });
         }
 
         public override void Exit()

@@ -1,11 +1,10 @@
 using System;
 using StateMachine.States;
 using UnityEngine;
-using Interfaces;
 
 namespace StateMachine
 {
-    public class PlayerStateMachine : BaseStateMachine, IDamageable
+    public class PlayerStateMachine : BaseStateMachine
     {
         
         public PlayerState PreviousState { get; set; }
@@ -30,6 +29,8 @@ namespace StateMachine
         public float JumpForce;
 
         public float DodgeForce;
+
+        public float respawnSpeed;
         
         public float MouseSensitivity = 100f;
         public Transform CameraTransform;
@@ -43,7 +44,9 @@ namespace StateMachine
         public bool IsGrounded;
 
         private float _xRotation = 0f;
-        private Health _health;
+        private float _health;
+        private float _maxHealth = 100;
+        public bool dead;
 
         public override void ChangeState(IState newState)
         {
@@ -84,12 +87,6 @@ namespace StateMachine
 
         public void Awake()
         {
-            _health = GetComponent<Health>();
-            if (_health != null)
-            {
-                _health.OnDeath += Die;
-            }
-
             RunState = new PlayerRunState(this);
             InvunerableState = new PlayerInvunerableState(this);
             WalkState = new PlayerWalkState(this);
@@ -100,6 +97,7 @@ namespace StateMachine
             IdleState = new PlayerIdleState(this);
             JumpState = new PlayerJumpState(this);
             _rb = GetComponent<Rigidbody>();
+            _health = _maxHealth;
 
         }
 
@@ -109,17 +107,10 @@ namespace StateMachine
             
         }
 
-        public void TakeDamage(float damage)
-        {
-            Debug.Log($"TakeDamage: {damage}");
-            if (CurrentState == InvunerableState) return;
-            
-            _health?.TakeDamage(damage);
-        }
-
         public void Die()
         {
             ChangeState(DeadState);
+            dead = true;
         }
 
         public void Walk()
@@ -127,6 +118,15 @@ namespace StateMachine
             ChangeState(WalkState);
         }
 
+        public void TakeDamage(float damage)
+        {
+            if(dead) return;
+            _health -= damage;
+            if (_health <= 0)
+            {
+                Die();
+            }
+        }
         public void Move(Vector2 movement)
         {
             MovementDirection = movement;
@@ -147,7 +147,6 @@ namespace StateMachine
 
         public void Respawn()
         {
-            _health?.ResetHealth();
             ChangeState(RespawnState);
         }
 
