@@ -50,7 +50,7 @@ public class MonsterStateMachine : BaseStateMachine
         _health =  maxHealth;
     }
 
-    private bool _hasActivated = false;
+    private bool _isActive = false;
 
     private void Start()
     {
@@ -67,11 +67,24 @@ public class MonsterStateMachine : BaseStateMachine
 
     public void Activate()
     {
-        if (_hasActivated) return;
-        _hasActivated = true;
+        if (_isActive) return;
+        _isActive = true;
 
-        GeneratePatrolPoints();
+        if (PatrolPoints.Count == 0)
+        {
+            GeneratePatrolPoints();
+        }
+        
         ChangeState(PatrolState);
+    }
+
+    public void Deactivate()
+    {
+        if (!_isActive) return;
+        _isActive = false;
+
+        StopMoving();
+        ChangeState(IdleState);
     }
 
     private void GeneratePatrolPoints()

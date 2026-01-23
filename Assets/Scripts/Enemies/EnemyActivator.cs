@@ -1,5 +1,6 @@
 using StateMachine;
 using UnityEngine;
+using System.Collections;
 
 [RequireComponent(typeof(SphereCollider))]
 public class EnemyActivator : MonoBehaviour
@@ -10,7 +11,12 @@ public class EnemyActivator : MonoBehaviour
     [Tooltip("Distance at which the enemy activates.")]
     public float activationRadius = 20f;
 
+    [Tooltip("Distance at which the enemy deactivates.")]
+    public float deactivationRadius = 30f;
+
     private SphereCollider _activationTrigger;
+    private Transform _playerTransform;
+    private bool _isActive = false;
 
     private void Awake()
     {
@@ -31,20 +37,47 @@ public class EnemyActivator : MonoBehaviour
         }
     }
 
+    private IEnumerator WatchPlayerDistance()
+    {
+        WaitForSeconds wait = new WaitForSeconds(0.1f);
+        while (_isActive && _playerTransform != null)
+        {
+            yield return wait;
+
+            float distance = Vector3.Distance(transform.position, _playerTransform.position);
+            
+            if (distance > deactivationRadius)
+            {
+                DeactivateEnemy();
+            }
+        }
+    }
+
     private void OnTriggerEnter(Collider other)
     {
-        if (monsterStateMachine == null) return;
+        if (_isActive || monsterStateMachine == null) return;
 
-        // Check if the object entering is the player
-        // Assuming the player has a tag "Player" or a specific component.
-        // Based on previous file reads, Player has 'PlayerStateMachine'.
         if (other.CompareTag("Player") || other.GetComponent<PlayerStateMachine>() != null || other.GetComponentInParent<PlayerStateMachine>() != null)
         {
-            monsterStateMachine.Activate();
-            
-            // Disable this object/collider so it doesn't trigger again
-            gameObject.SetActive(false);
+            _playerTransform = other.transform;
+            ActivateEnemy();
         }
+    }
+
+    private void ActivateEnemy()
+    {
+        _isActive = true;
+        monsterStateMachine.Activate();
+        _activationTrigger.enabled = false; // Disable trigger to stop checks
+        StartCoroutine(WatchPlayerDistance());
+    }
+
+    private void DeactivateEnemy()
+    {
+        _isActive = false;
+        monsterStateMachine.Deactivate();
+        _activationTrigger.enabled = true; // Re-enable trigger
+        _playerTransform = null;
     }
 
     // Helper to visualize the radius in the editor
@@ -52,5 +85,8 @@ public class EnemyActivator : MonoBehaviour
     {
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, activationRadius);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, deactivationRadius);
     }
 }

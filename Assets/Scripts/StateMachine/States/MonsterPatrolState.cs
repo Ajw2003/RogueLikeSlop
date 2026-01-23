@@ -10,7 +10,13 @@ namespace StateMachine.States
 
         public override void Enter()
         {
-            // Optionally set initial patrol point or behavior
+            if (_stateMachine.PatrolPoints.Count == 0)
+            {
+                _stateMachine.ChangeState(_stateMachine.IdleState);
+                return;
+            }
+
+            MoveToNextPoint();
         }
 
         public override void Update()
@@ -22,22 +28,19 @@ namespace StateMachine.States
                 return;
             }
 
-            // Patrol logic
-            if (_stateMachine.PatrolPoints.Count == 0)
-            {
-                // If no patrol points, maybe just idle or stand still
-                _stateMachine.ChangeState(_stateMachine.IdleState);
-                return;
-            }
-
-            Vector3 targetPoint = _stateMachine.PatrolPoints[_stateMachine.CurrentPatrolPointIndex];
-            _stateMachine.MoveTo(targetPoint);
-
             // Check if reached current patrol point using the NavMesh optimized check
             if (_stateMachine.HasReachedDestination())
             {
                 _stateMachine.CurrentPatrolPointIndex = (_stateMachine.CurrentPatrolPointIndex + 1) % _stateMachine.PatrolPoints.Count;
+                MoveToNextPoint();
             }
+        }
+
+        private void MoveToNextPoint()
+        {
+            if (_stateMachine.PatrolPoints.Count == 0) return;
+            Vector3 targetPoint = _stateMachine.PatrolPoints[_stateMachine.CurrentPatrolPointIndex];
+            _stateMachine.MoveTo(targetPoint);
         }
 
         public override void Exit()
