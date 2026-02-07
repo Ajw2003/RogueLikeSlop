@@ -3,7 +3,6 @@ using UnityEngine;
 
 public class PlayerJumpState : PlayerState
 {
-    private float horizontalSpeed;
     private float _jumpTime;
 
     public PlayerJumpState(PlayerStateMachine stateMachine) : base(stateMachine)
@@ -16,14 +15,12 @@ public class PlayerJumpState : PlayerState
         Vector3 jumpVector = Vector3.up * _stateMachine.JumpForce;
         _stateMachine._rb.AddForce(jumpVector, ForceMode.Impulse);
 
-        // Store the current horizontal speed for movement during jump
-        horizontalSpeed = _stateMachine.walkSpeed * 0.7f;
         _jumpTime = Time.time;
     }
 
     public override void FixedUpdate()
     {
-        HandleHorizontalMovement();
+        HandleAirSteering();
 
         // Add a small grace period before checking grounded to ensure we've actually left the ground
         if (Time.time > _jumpTime + 0.2f && _stateMachine.IsGrounded)
@@ -31,25 +28,28 @@ public class PlayerJumpState : PlayerState
             Exit();
         }
     }
-    
-    private void HandleHorizontalMovement()
+
+    private void HandleAirSteering()
     {
-        // Preserve the current Y (vertical) velocity
-        float currentVerticalVelocity = _stateMachine._rb.linearVelocity.y;
+        // Use camera-relative movement
+        Vector3 cameraForward = Vector3.ProjectOnPlane(_stateMachine.CameraTransform.forward, Vector3.up).normalized;
+        Vector3 cameraRight = Vector3.ProjectOnPlane(_stateMachine.CameraTransform.right, Vector3.up).normalized;
+        Vector3 moveInput = (cameraForward * _stateMachine.MovementDirection.y) + (cameraRight * _stateMachine.MovementDirection.x);
 
-        // Calculate direction relative to player orientation
-        Vector3 inputDir = new Vector3(_stateMachine.MovementDirection.x, 0, _stateMachine.MovementDirection.y);
-        
-        // Normalize input if magnitude > 1 to prevent faster diagonal movement
-        if (inputDir.sqrMagnitude > 1f) inputDir.Normalize();
+        if (moveInput.sqrMagnitude > 0.01f)
+        {
+            // Apply a force for steering
+            float steeringForce = _stateMachine.walkSpeed * _stateMachine.AirControl * 5f;
+            _stateMachine._rb.AddForce(moveInput * steeringForce, ForceMode.Acceleration);
 
-        Vector3 moveDir = _stateMachine.transform.TransformDirection(inputDir);
-
-        Vector3 targetVelocity = moveDir * horizontalSpeed;
-        targetVelocity.y = currentVerticalVelocity;
-
-        // Apply the new velocity while preserving the Y component from jumping physics
-        _stateMachine._rb.linearVelocity = targetVelocity;
+            // Clamp horizontal velocity to max walkSpeed
+            Vector3 horizontalVel = new Vector3(_stateMachine._rb.linearVelocity.x, 0, _stateMachine._rb.linearVelocity.z);
+            if (horizontalVel.magnitude > _stateMachine.walkSpeed)
+            {
+                horizontalVel = horizontalVel.normalized * _stateMachine.walkSpeed;
+                _stateMachine._rb.linearVelocity = new Vector3(horizontalVel.x, _stateMachine._rb.linearVelocity.y, horizontalVel.z);
+            }
+        }
     }
 
     public override void Exit()

@@ -234,6 +234,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyActivator
   monsterStateMachine: {fileID: 3196065196339307885}
-  activationRadius: 15
-  deactivationRadius: 20
+  activationRadius: 25
+  deactivationRadius: 50
   showDebugGizmos: 0

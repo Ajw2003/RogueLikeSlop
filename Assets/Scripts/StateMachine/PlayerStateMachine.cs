@@ -28,6 +28,11 @@ namespace StateMachine
 
         public float JumpForce;
 
+        public float FallMultiplier = 2.5f;
+
+        [Range(0, 1)]
+        public float AirControl = 0.7f;
+
         public float DodgeForce;
 
         public float respawnSpeed;
@@ -148,6 +153,17 @@ namespace StateMachine
         public void Respawn()
         {
             ChangeState(RespawnState);
+        }
+
+        public override void FixedUpdate()
+        {
+            // Apply extra gravity force if not grounded to make falling feel weightier
+            if (!IsGrounded && _rb != null)
+            {
+                // We apply (Multiplier - 1) because the physics engine is already applying 1x gravity
+                Vector3 extraGravity = Vector3.up * Physics.gravity.y * (FallMultiplier - 1);
+                _rb.AddForce(extraGravity, ForceMode.Acceleration);
+            }
         }
 
         public void Dead()
