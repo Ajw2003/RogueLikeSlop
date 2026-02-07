@@ -46,6 +46,10 @@ namespace StateMachine
         public float AttackDamage = 10f;
         public LayerMask EnemyLayers;
 
+        [Header("Ground Check Settings")]
+        public Transform GroundCheckPosition;
+        public float GroundCheckRadius = 0.2f;
+        public LayerMask GroundLayer;
         public bool IsGrounded;
 
         private float _xRotation = 0f;
@@ -84,10 +88,17 @@ namespace StateMachine
 
         private void OnDrawGizmosSelected()
         {
-            if (AttackPoint == null)
-                return;
+            if (AttackPoint != null)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawWireSphere(AttackPoint.position, AttackRange);
+            }
 
-            Gizmos.DrawWireSphere(AttackPoint.position, AttackRange);
+            if (GroundCheckPosition != null)
+            {
+                Gizmos.color = Color.green;
+                Gizmos.DrawWireSphere(GroundCheckPosition.position, GroundCheckRadius);
+            }
         }
 
         public void Awake()
@@ -104,6 +115,10 @@ namespace StateMachine
             _rb = GetComponent<Rigidbody>();
             _health = _maxHealth;
 
+            if (GroundCheckPosition == null)
+            {
+                Debug.LogWarning("GroundCheckPosition is not assigned in PlayerStateMachine!");
+            }
         }
 
         private void Start()
@@ -157,6 +172,9 @@ namespace StateMachine
 
         public override void FixedUpdate()
         {
+            GroundCheck();
+            base.FixedUpdate();
+
             // Apply extra gravity force if not grounded to make falling feel weightier
             if (!IsGrounded && _rb != null)
             {
@@ -185,19 +203,22 @@ namespace StateMachine
             }
         }
 
-        private void OnTriggerEnter(Collider other)
+        public void GroundCheck()
         {
-            IsGrounded = true;
-        }
-
-        private void OnTriggerStay(Collider other)
-        {
-            IsGrounded = true;
-        }
-
-        private void OnTriggerExit(Collider other)
-        {
-            IsGrounded = false;
+            if (GroundCheckPosition != null)
+            {
+                IsGrounded = false;
+                Collider[] colliders = Physics.OverlapSphere(GroundCheckPosition.position, GroundCheckRadius, GroundLayer);
+                
+                foreach (var collider in colliders)
+                {
+                    if (collider.transform.root != transform.root)
+                    {
+                        IsGrounded = true;
+                        break;
+                    }
+                }
+            }
         }
 
         public void Attack()
