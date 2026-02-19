@@ -1,11 +1,14 @@
 using System;
 using StateMachine.States;
 using UnityEngine;
+using Interfaces;
 
 namespace StateMachine
 {
-    public class PlayerStateMachine : BaseStateMachine
+    public class PlayerStateMachine : BaseStateMachine, IHealth
     {
+        public float CurrentHealth => _health;
+        public float MaxHealth => _maxHealth;
         
         public PlayerState PreviousState { get; set; }
         

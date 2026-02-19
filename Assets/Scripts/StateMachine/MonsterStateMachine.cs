@@ -3,9 +3,13 @@ using StateMachine.States;
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections.Generic;
+using Interfaces;
 
-public class MonsterStateMachine : BaseStateMachine
+public class MonsterStateMachine : BaseStateMachine, IHealth
 {
+    public float CurrentHealth => _health;
+    public float MaxHealth => maxHealth;
+
     public Transform PlayerTarget { get; set; }
     public float MoveSpeed = 3f;
     public List<Vector3> PatrolPoints = new List<Vector3>();
