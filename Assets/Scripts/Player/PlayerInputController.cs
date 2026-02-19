@@ -22,9 +22,9 @@ namespace Player
            Cursor.lockState = CursorLockMode.Locked;
        }
 
-       private void LateUpdate()
+       private void Start()
        {
-           
+           EnableAllInputs();
        }
 
        private void Update()
@@ -50,6 +50,41 @@ namespace Player
                    _input.PlayerActions.Move.canceled -= OnMoveCanceled;
                return;
            }
+       }
+
+       private void OpenInventoryInput(bool enable)
+       {
+           if (enable)
+           {
+               _input.PlayerActions.OpenInventory.performed += OnOpenInventoryPerformed;
+           }
+       }
+
+       private void OnOpenInventoryPerformed(InputAction.CallbackContext context)
+       {
+           Cursor.lockState = CursorLockMode.None;
+       }
+       
+
+       private void InventoryInputs(bool enable)
+       {
+           if (enable)
+           {
+               _input.Inventory.Enable();
+               _input.Inventory.Clicked.started += OnClickedPerformed;
+               _input.Inventory.Clicked.canceled += OnClickedPerformed;
+           }
+           else
+           {
+               _input.Inventory.Clicked.started -= OnClickedPerformed;
+               _input.Inventory.Clicked.canceled -= OnClickedPerformed;
+               _input.Inventory.Disable();
+           }
+       }
+
+       private void OnClickedPerformed(InputAction.CallbackContext context)
+       {
+           InventoryManager.Instance.OnInventoryClicked(context);
        }
        
        private void OnMovePerformed(InputAction.CallbackContext context)
@@ -199,11 +234,15 @@ namespace Player
            JumpInputs(false);
            AttackInputs(false);
            LookInputs(false);
+           OpenInventoryInput(false);
        }
 
        private void EnableAllInputs()
        {
-           _input.PlayerActions.Enable();
+           if (_input == null) _input = new PlayerInputs();
+           _input.Enable();
+           
+           OpenInventoryInput(true);
            WalkInputs(true);
            SprintInputs(true);
            InteractInputs(true);
@@ -211,6 +250,7 @@ namespace Player
            JumpInputs(true);
            AttackInputs(true);
            LookInputs(true);
+           InventoryInputs(true);
        }
     }
 }
