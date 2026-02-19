@@ -7,6 +7,8 @@ public class InventoryItem : MonoBehaviour
     private bool _isDragging = false;
     private Vector3 _targetPosition;
     
+    private Quaternion _targetRotation = Quaternion.identity;
+    
     [Header("Physics Settings")]
     [SerializeField] private float _followSpeed = 20f;
     [SerializeField] private float _rotationSpeed = 10f;
@@ -18,6 +20,7 @@ public class InventoryItem : MonoBehaviour
         _rb.useGravity = true;
         _rb.interpolation = RigidbodyInterpolation.Interpolate;
         _rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+        _targetRotation = transform.rotation;
     }
 
     private void FixedUpdate()
@@ -28,9 +31,8 @@ public class InventoryItem : MonoBehaviour
             Vector3 direction = _targetPosition - _rb.position;
             _rb.linearVelocity = direction * _followSpeed;
             
-            // Optional: keep rotation upright or follow a certain orientation
-            Quaternion targetRotation = Quaternion.identity; 
-            _rb.MoveRotation(Quaternion.Slerp(_rb.rotation, targetRotation, Time.fixedDeltaTime * _rotationSpeed));
+            // Slerp towards target rotation
+            _rb.MoveRotation(Quaternion.Slerp(_rb.rotation, _targetRotation, Time.fixedDeltaTime * _rotationSpeed));
         }
     }
 
@@ -40,12 +42,27 @@ public class InventoryItem : MonoBehaviour
         _rb.useGravity = false;
         _rb.linearVelocity = Vector3.zero;
         _rb.angularVelocity = Vector3.zero;
+        _targetRotation = transform.rotation;
     }
+
+    public void UpdateRotation(Quaternion rotation)
+    {
+        _targetRotation = rotation;
+    }
+
+    public Quaternion TargetRotation => _targetRotation;
 
     public void StopDragging()
     {
         _isDragging = false;
         _rb.useGravity = true;
+    }
+
+    public void Throw(Vector3 direction, float force)
+    {
+        _isDragging = false;
+        _rb.useGravity = true;
+        _rb.AddForce(direction * force, ForceMode.Impulse);
     }
 
     public void UpdateTargetPosition(Vector3 position)

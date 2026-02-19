@@ -29,6 +29,13 @@ namespace Player
 
        private void Update()
        {
+           // Lock player rotation if we are currently rotating an inventory item
+           if (InventoryManager.Instance != null && InventoryManager.Instance.IsRotatingObject)
+           {
+               _stateMachine.Look(Vector2.zero);
+               return;
+           }
+           
            _stateMachine.Look(GetLookDelta());
        }
 

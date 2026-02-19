@@ -11,6 +11,9 @@ public class InventoryManager : SingletonBase<InventoryManager>
     [SerializeField] private float _maxDragDepth = 10f;
     [SerializeField] private float _raycastDistance = 100f;
     
+    [SerializeField] private float _rotationSensitivity = 0.5f;
+    [SerializeField] private float _throwForce = 15f;
+    
     private InventoryItem _hoveredItem;
     private InventoryItem _draggedItem;
     private Camera _mainCamera;
@@ -28,6 +31,8 @@ public class InventoryManager : SingletonBase<InventoryManager>
         }
     }
 
+    public bool IsRotatingObject => _draggedItem != null && Mouse.current != null && Mouse.current.middleButton.isPressed;
+
     private void Update()
     {
         if (_mainCamera == null) return;
@@ -36,8 +41,50 @@ public class InventoryManager : SingletonBase<InventoryManager>
         
         if (_draggedItem != null)
         {
-            HandleScrollDepth();
-            UpdateDraggedItemPosition();
+            // Throw handling (Right Click)
+            if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
+            {
+                ThrowDraggedItem();
+                return;
+            }
+
+            if (Mouse.current != null && Mouse.current.middleButton.isPressed)
+            {
+                HandleRotation();
+            }
+            else
+            {
+                HandleScrollDepth();
+                UpdateDraggedItemPosition();
+            }
+        }
+    }
+
+    private void ThrowDraggedItem()
+    {
+        if (_draggedItem != null)
+        {
+            Vector3 throwDirection = _mainCamera.transform.forward;
+            _draggedItem.Throw(throwDirection, _throwForce);
+            _draggedItem = null;
+        }
+    }
+
+    private void HandleRotation()
+    {
+        if (Mouse.current == null) return;
+        
+        Vector2 delta = Mouse.current.delta.ReadValue();
+        if (delta.sqrMagnitude > 0.01f)
+        {
+            // Rotate around camera's up and right axes
+            Vector3 camRight = _mainCamera.transform.right;
+            Vector3 camUp = _mainCamera.transform.up;
+
+            Quaternion rotX = Quaternion.AngleAxis(-delta.y * _rotationSensitivity, camRight);
+            Quaternion rotY = Quaternion.AngleAxis(-delta.x * _rotationSensitivity, camUp);
+
+            _draggedItem.UpdateRotation(rotX * rotY * _draggedItem.TargetRotation);
         }
     }
 
