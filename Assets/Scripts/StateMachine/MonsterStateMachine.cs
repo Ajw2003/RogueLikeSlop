@@ -34,6 +34,9 @@ public class MonsterStateMachine : BaseStateMachine, IHealth
     public float MinEscapeTime = 2f;
     public float MaxEscapeTime = 5f;
 
+    [Header("Physics Damage Settings")]
+    public float MinVelocityForDamage = 3f;
+
     private NavMeshAgent _agent;
     private float _health;
     public float maxHealth = 100;
@@ -163,6 +166,15 @@ public class MonsterStateMachine : BaseStateMachine, IHealth
 
     public void TakeDamage(float damage)
     {
+        _health -= damage;
+        if(_health <= 0)
+            Die();
+    }
+
+    public void TakeDamage(float damage, float impactVelocity)
+    {
+        if (impactVelocity < MinVelocityForDamage) return;
+
         _health -= damage;
         if(_health <= 0)
             Die();

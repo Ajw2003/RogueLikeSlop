@@ -1,4 +1,3 @@
-using StateMachine;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -20,7 +19,9 @@ public class Item : MonoBehaviour
 
     [Header("Damage Settings")]
     [SerializeField] private float _damageMultiplier = 2f;
-    [SerializeField] private float _minVelocityForDamage = 2f;
+    [SerializeField] private float _damageCooldown = 0.5f;
+
+    private float _lastDamageTime;
     
     private void Awake()
     {
@@ -50,38 +51,48 @@ public class Item : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        
-        // Don't deal damage if we're currently being held/dragged
+        // 1. Safety Checks
         if (_isDragging) return;
+        if (Time.time < _lastDamageTime + _damageCooldown) return;
 
+        // 2. Velocity Calculation
         float impactVelocity = collision.relativeVelocity.magnitude;
+        float myVelocity = _rb.linearVelocity.magnitude;
 
-        if (impactVelocity >= _minVelocityForDamage)
+        // 3. Damage Application
+        int damage = Mathf.RoundToInt(impactVelocity * _damageMultiplier);
+        bool dealtDamage = false;
+
+        // Damage target
+        if (collision.gameObject.TryGetComponent(out MonsterStateMachine targetMonster))
         {
-            // Calculate damage and convert to integer
-            int damage = Mathf.RoundToInt(impactVelocity * _damageMultiplier);
-            
-            // 1. Damage the thing we hit (if it's a monster or player)
-            if (collision.gameObject.TryGetComponent(out MonsterStateMachine targetMonster))
-            {
-                targetMonster.TakeDamage(damage);
-                Debug.Log($"Item hit {collision.gameObject.name} for {damage} damage");
-            }
-            else if (collision.gameObject.TryGetComponent(out StateMachine.PlayerStateMachine player))
-            {
-                player.TakeDamage(damage);
-                Debug.Log($"Item hit Player for {damage} damage");
-            }
+            float currentHealthBefore = targetMonster.CurrentHealth;
+            targetMonster.TakeDamage(damage, impactVelocity);
+            if (targetMonster.CurrentHealth < currentHealthBefore) dealtDamage = true;
+        }
+        else if (collision.gameObject.TryGetComponent(out StateMachine.PlayerStateMachine player))
+        {
+            float currentHealthBefore = player.CurrentHealth;
+            player.TakeDamage(damage, impactVelocity);
+            if (player.CurrentHealth < currentHealthBefore) dealtDamage = true;
+        }
 
-            // 2. Damage OURSELVES if we are an enemy being thrown
-            if (_monsterAI != null)
+        // Damage ourselves (if we are an enemy item being thrown)
+        if (_monsterAI != null)
+        {
+            // Only take impact damage if we are NOT grounded/active
+            if (!_agent.enabled || myVelocity > 1f) // Small threshold for "moving"
             {
-                _monsterAI.TakeDamage(damage);
-                Debug.Log($"Enemy Item {gameObject.name} took {damage} impact damage");
-                
-                // If we are still alive and have settled, we could potentially re-activate
-                // But for now, let's keep it simple: they stay deactivated until we decide otherwise
+                float currentHealthBefore = _monsterAI.CurrentHealth;
+                _monsterAI.TakeDamage(damage, impactVelocity);
+                if (_monsterAI.CurrentHealth < currentHealthBefore) dealtDamage = true;
             }
+        }
+
+        if (dealtDamage)
+        {
+            _lastDamageTime = Time.time;
+            Debug.Log($"Impact Damage Dealt: {damage} (Impact: {impactVelocity:F1})");
         }
     }
 
@@ -106,10 +117,6 @@ public class Item : MonoBehaviour
         _rb.useGravity = true;
 
         // Release the AI from the PickedUp state
-        if (_monsterAI != null)
-        {
-            _monsterAI.Release();
-        }
     }
 
     public void Throw(Vector3 direction, float force)

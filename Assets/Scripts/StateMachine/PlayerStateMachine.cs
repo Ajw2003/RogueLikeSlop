@@ -55,6 +55,9 @@ namespace StateMachine
         public LayerMask GroundLayer;
         public bool IsGrounded;
 
+        [Header("Physics Damage Settings")]
+        public float MinVelocityForDamage = 5f;
+
         private float _xRotation = 0f;
         private float _health;
         private float _maxHealth = 100;
@@ -66,9 +69,9 @@ namespace StateMachine
                 return;
 
             PreviousState = CurrentState as PlayerState;
-            //Debug.Log($"Previous State: {PreviousState}");
+            Debug.Log($"Previous State: {PreviousState}");
             base.ChangeState(newState);
-            //Debug.Log($"State Changed to: {CurrentState}");
+            Debug.Log($"State Changed to: {CurrentState}");
         }
 
         public void Look(Vector2 lookDelta)
@@ -150,6 +153,19 @@ namespace StateMachine
                 Die();
             }
         }
+
+        public void TakeDamage(float damage, float impactVelocity)
+        {
+            if(dead) return;
+            if (impactVelocity < MinVelocityForDamage) return;
+
+            _health -= damage;
+            if (_health <= 0)
+            {
+                Die();
+            }
+        }
+
         public void Move(Vector2 movement)
         {
             MovementDirection = movement;

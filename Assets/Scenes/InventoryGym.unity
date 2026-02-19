@@ -303,6 +303,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: InventoryItemTest (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 7804802498852699182, guid: 255cc31540c728c4b888d62df3353cac, type: 3}
+      propertyPath: _minVelocityForDamage
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -359,6 +363,10 @@ PrefabInstance:
     - target: {fileID: 3613298905547993340, guid: 255cc31540c728c4b888d62df3353cac, type: 3}
       propertyPath: m_Name
       value: InventoryItemTest (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7804802498852699182, guid: 255cc31540c728c4b888d62df3353cac, type: 3}
+      propertyPath: _minVelocityForDamage
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -485,6 +493,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3073191709587133078, guid: 4842925a86ec07a4a86f90de28298d6a, type: 3}
+      propertyPath: MinVelocityForDamage
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 3692950085917293467, guid: 4842925a86ec07a4a86f90de28298d6a, type: 3}
       propertyPath: m_Name
       value: Player
@@ -549,6 +561,14 @@ PrefabInstance:
     - target: {fileID: 1953330812149981427, guid: 756825e3188f3034abeb8c77ac8cc128, type: 3}
       propertyPath: m_Name
       value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 2133985982222585973, guid: 756825e3188f3034abeb8c77ac8cc128, type: 3}
+      propertyPath: _minVelocityForDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3196065196339307885, guid: 756825e3188f3034abeb8c77ac8cc128, type: 3}
+      propertyPath: MinVelocityForDamage
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 4083720998800043139, guid: 756825e3188f3034abeb8c77ac8cc128, type: 3}
       propertyPath: m_AnchorMax.y
@@ -837,6 +857,10 @@ PrefabInstance:
     - target: {fileID: 3613298905547993340, guid: 255cc31540c728c4b888d62df3353cac, type: 3}
       propertyPath: m_Name
       value: InventoryItemTest
+      objectReference: {fileID: 0}
+    - target: {fileID: 7804802498852699182, guid: 255cc31540c728c4b888d62df3353cac, type: 3}
+      propertyPath: _minVelocityForDamage
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
