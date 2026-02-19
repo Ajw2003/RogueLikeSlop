@@ -23,37 +23,36 @@ namespace StateMachine.States
 
         public override void Update()
         {
-            // If the agent is disabled (e.g., from PickedUp state), check if we can re-enable it
-            if (_agent != null && !_agent.enabled)
+            // Re-activation logic for when coming from PickedUp or falling
+            if (_agent != null )
             {
                 // Wait until the monster is grounded and moving slowly
-                if (_rb != null && _rb.linearVelocity.magnitude < 0.2f)
+                if (_rb != null && _rb.linearVelocity.magnitude < 0.15f)
                 {
-                    NavMeshHit hit;
-                    if (NavMesh.SamplePosition(_rb.position, out hit, 1.0f, NavMesh.AllAreas))
-                    {
-                        _agent.enabled = true;
-                        _stateMachine.Activate(); // Re-activate the monster's logic
-                    }
+                    Debug.Log($"{_stateMachine.gameObject.name} re-activating AI after landing.");
+                    _agent.enabled = true;
+                        
+                    // We need to make sure the state machine's internal _isActive is true
+                    // so it can continue with normal AI logic
+                    _stateMachine.Activate(); 
                 }
                 
-                // If the agent is still disabled, don't perform other logic
-                return;
+                // If the agent is still disabled (mid-air or mid-struggle), don't perform other logic
             }
 
-            // Normal Idle Logic
+            // Normal Idle Logic (Only runs if agent.enabled is true)
             _visionTimer += Time.deltaTime;
             if (_visionTimer < 0.2f) return;
             _visionTimer = 0f;
 
-            // Even when idling, check if the player can be seen
+            // Check if the player can be seen
             if (_stateMachine.CanSeePlayer())
             {
                 _stateMachine.ChangeState(_stateMachine.PursueState);
                 return;
             }
 
-            // If patrol points are added or becomes available, go back to patrol
+            // If patrol points are available, go back to patrol
             if (_stateMachine.PatrolPoints.Count > 0)
             {
                 _stateMachine.ChangeState(_stateMachine.PatrolState);

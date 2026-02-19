@@ -17,7 +17,7 @@ namespace StateMachine.States
                 _stateMachine.ChangeState(_stateMachine.IdleState);
                 return;
             }
-
+            _stateMachine.agent.enabled = true;
             _visionTimer = 0f;
             MoveToNextPoint();
         }

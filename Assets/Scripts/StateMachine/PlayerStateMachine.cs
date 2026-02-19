@@ -58,6 +58,9 @@ namespace StateMachine
         [Header("Physics Damage Settings")]
         public float MinVelocityForDamage = 5f;
 
+        [Header("Item Interaction Settings")]
+        public float ChokeDamage = 5f; // Damage per second while holding an enemy
+
         private float _xRotation = 0f;
         private float _health;
         private float _maxHealth = 100;

@@ -13,6 +13,7 @@ namespace StateMachine.States
         public override void Enter()
         {
             _repathTimer = 0f;
+            _stateMachine.agent.enabled = true;
         }
 
         public override void Update()

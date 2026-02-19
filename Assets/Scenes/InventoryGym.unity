@@ -567,6 +567,10 @@ PrefabInstance:
       value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3196065196339307885, guid: 756825e3188f3034abeb8c77ac8cc128, type: 3}
+      propertyPath: PatrolPointCount
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3196065196339307885, guid: 756825e3188f3034abeb8c77ac8cc128, type: 3}
       propertyPath: MinVelocityForDamage
       value: 12
       objectReference: {fileID: 0}

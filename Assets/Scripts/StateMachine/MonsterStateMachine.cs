@@ -37,7 +37,7 @@ public class MonsterStateMachine : BaseStateMachine, IHealth
     [Header("Physics Damage Settings")]
     public float MinVelocityForDamage = 3f;
 
-    private NavMeshAgent _agent;
+    public NavMeshAgent agent;
     private float _health;
     public float maxHealth = 100;
     private Coroutine _struggleCoroutine;
@@ -52,8 +52,8 @@ public class MonsterStateMachine : BaseStateMachine, IHealth
 
     private void Awake()
     {
-        _agent = GetComponent<NavMeshAgent>();
-        _agent.speed = MoveSpeed;
+        agent = GetComponent<NavMeshAgent>();
+        agent.speed = MoveSpeed;
 
         PatrolState = new MonsterPatrolState(this);
         PursueState = new MonsterPursueState(this);
@@ -79,15 +79,8 @@ public class MonsterStateMachine : BaseStateMachine, IHealth
         }
     }
 
-    public override void Update()
-    {
-        if (!_isActive) return;
-        base.Update();
-    }
-
     public void Activate()
     {
-        if (_isActive) return;
         _isActive = true;
 
         if (PatrolPoints.Count == 0)
@@ -133,7 +126,7 @@ public class MonsterStateMachine : BaseStateMachine, IHealth
             ItemManager.Instance.ForceRelease();
         }
         
-        // Ensure state transition
+        // Ensure state transition to Idle, which handles the re-activation
         Release();
     }
 
@@ -197,8 +190,9 @@ public class MonsterStateMachine : BaseStateMachine, IHealth
 
     public void Release()
     {
-        Activate();
-        _agent.enabled = true;
+        // Transition back to Idle. IdleState.Update will handle 
+        // landing on NavMesh and re-activating AI logic.
+        ChangeState(IdleState);
     }
 
     public bool CanSeePlayer()
@@ -273,25 +267,25 @@ public class MonsterStateMachine : BaseStateMachine, IHealth
 
     public void MoveTo(Vector3 targetPosition)
     {
-        if (_agent != null && _agent.isOnNavMesh)
+        if (agent != null && agent.isOnNavMesh)
         {
-            _agent.SetDestination(targetPosition);
+            agent.SetDestination(targetPosition);
         }
     }
 
     public void StopMoving()
     {
-        if (_agent != null && _agent.isOnNavMesh)
+        if (agent != null && agent.isOnNavMesh)
         {
-            _agent.ResetPath();
+            agent.ResetPath();
         }
     }
 
     public bool HasReachedDestination()
     {
-        if (_agent == null || !_agent.isOnNavMesh) return false;
+        if (agent == null || !agent.isOnNavMesh) return false;
         
         // Check if the agent is close enough to the target and has no path pending
-        return !_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance + PatrolPointReachedThreshold;
+        return !agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + PatrolPointReachedThreshold;
     }
 }
