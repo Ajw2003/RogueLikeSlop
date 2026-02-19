@@ -119,10 +119,6 @@ public class Item : MonoBehaviour
         _rb.AddForce(direction * force, ForceMode.Impulse);
 
         // Release the AI from the PickedUp state
-        if (_monsterAI != null)
-        {
-            _monsterAI.Release();
-        }
     }
 
     public void UpdateTargetPosition(Vector3 position)

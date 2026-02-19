@@ -1,3 +1,5 @@
+using UnityEngine.SceneManagement;
+
 namespace StateMachine.States
 {
     public class PlayerDeadState : PlayerState
@@ -8,7 +10,7 @@ namespace StateMachine.States
 
         public override void Enter()
         {
-            //Disable all Input But Pause
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
         public override void Exit()
