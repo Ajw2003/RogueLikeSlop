@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 [RequireComponent(typeof(Rigidbody))]
 public class Item : MonoBehaviour
@@ -8,6 +9,10 @@ public class Item : MonoBehaviour
     private Vector3 _targetPosition;
     private Quaternion _targetRotation = Quaternion.identity;
     
+    // References for enemy handling
+    private MonsterStateMachine _monsterAI;
+    private NavMeshAgent _agent;
+
     [Header("Physics Settings")]
     [SerializeField] private float _followSpeed = 20f;
     [SerializeField] private float _rotationSpeed = 10f;
@@ -19,6 +24,9 @@ public class Item : MonoBehaviour
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
+        _monsterAI = GetComponent<MonsterStateMachine>();
+        _agent = GetComponent<NavMeshAgent>();
+
         // Ensure the rigidbody is set up for physical dragging
         _rb.useGravity = true;
         _rb.interpolation = RigidbodyInterpolation.Interpolate;
@@ -48,20 +56,29 @@ public class Item : MonoBehaviour
 
         if (impactVelocity >= _minVelocityForDamage)
         {
-            // Calculate damage and convert to integer as requested
+            // Calculate damage and convert to integer
             int damage = Mathf.RoundToInt(impactVelocity * _damageMultiplier);
             
-            // Try to damage Monster
-            if (collision.gameObject.TryGetComponent(out MonsterStateMachine monster))
+            // 1. Damage the thing we hit (if it's a monster or player)
+            if (collision.gameObject.TryGetComponent(out MonsterStateMachine targetMonster))
             {
-                monster.TakeDamage(damage);
-                Debug.Log($"Item hit {collision.gameObject.name} for {damage} damage (Velocity: {impactVelocity})");
+                targetMonster.TakeDamage(damage);
+                Debug.Log($"Item hit {collision.gameObject.name} for {damage} damage");
             }
-            // Try to damage Player
             else if (collision.gameObject.TryGetComponent(out StateMachine.PlayerStateMachine player))
             {
                 player.TakeDamage(damage);
-                Debug.Log($"Item hit Player for {damage} damage (Velocity: {impactVelocity})");
+                Debug.Log($"Item hit Player for {damage} damage");
+            }
+
+            // 2. Damage OURSELVES if we are an enemy being thrown
+            if (_monsterAI != null)
+            {
+                _monsterAI.TakeDamage(damage);
+                Debug.Log($"Enemy Item {gameObject.name} took {damage} impact damage");
+                
+                // If we are still alive and have settled, we could potentially re-activate
+                // But for now, let's keep it simple: they stay deactivated until we decide otherwise
             }
         }
     }
@@ -73,12 +90,24 @@ public class Item : MonoBehaviour
         _rb.linearVelocity = Vector3.zero;
         _rb.angularVelocity = Vector3.zero;
         _targetRotation = transform.rotation;
+
+        // Transition to PickedUp state if we are an enemy
+        if (_monsterAI != null)
+        {
+            _monsterAI.PickUp();
+        }
     }
 
     public void StopDragging()
     {
         _isDragging = false;
         _rb.useGravity = true;
+
+        // Release the AI from the PickedUp state
+        if (_monsterAI != null)
+        {
+            _monsterAI.Release();
+        }
     }
 
     public void Throw(Vector3 direction, float force)
@@ -86,6 +115,12 @@ public class Item : MonoBehaviour
         _isDragging = false;
         _rb.useGravity = true;
         _rb.AddForce(direction * force, ForceMode.Impulse);
+
+        // Release the AI from the PickedUp state
+        if (_monsterAI != null)
+        {
+            _monsterAI.Release();
+        }
     }
 
     public void UpdateTargetPosition(Vector3 position)
@@ -99,6 +134,5 @@ public class Item : MonoBehaviour
     }
 
     public Quaternion TargetRotation => _targetRotation;
-
     public bool IsDragging => _isDragging;
 }

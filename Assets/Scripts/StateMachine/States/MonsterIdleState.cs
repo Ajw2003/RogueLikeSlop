@@ -1,13 +1,18 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace StateMachine.States
 {
     public class MonsterIdleState : MonsterState
     {
         private float _visionTimer;
+        private NavMeshAgent _agent;
+        private Rigidbody _rb;
 
         public MonsterIdleState(MonsterStateMachine stateMachine) : base(stateMachine)
         {
+            _agent = stateMachine.GetComponent<NavMeshAgent>();
+            _rb = stateMachine.GetComponent<Rigidbody>();
         }
 
         public override void Enter()
@@ -18,13 +23,25 @@ namespace StateMachine.States
 
         public override void Update()
         {
-            // If patrol points are added or becomes available, go back to patrol
-            if (_stateMachine.PatrolPoints.Count > 0)
+            // If the agent is disabled (e.g., from PickedUp state), check if we can re-enable it
+            if (_agent != null && !_agent.enabled)
             {
-                _stateMachine.ChangeState(_stateMachine.PatrolState);
+                // Wait until the monster is grounded and moving slowly
+                if (_rb != null && _rb.linearVelocity.magnitude < 0.2f)
+                {
+                    NavMeshHit hit;
+                    if (NavMesh.SamplePosition(_rb.position, out hit, 1.0f, NavMesh.AllAreas))
+                    {
+                        _agent.enabled = true;
+                        _stateMachine.Activate(); // Re-activate the monster's logic
+                    }
+                }
+                
+                // If the agent is still disabled, don't perform other logic
                 return;
             }
 
+            // Normal Idle Logic
             _visionTimer += Time.deltaTime;
             if (_visionTimer < 0.2f) return;
             _visionTimer = 0f;
@@ -33,6 +50,13 @@ namespace StateMachine.States
             if (_stateMachine.CanSeePlayer())
             {
                 _stateMachine.ChangeState(_stateMachine.PursueState);
+                return;
+            }
+
+            // If patrol points are added or becomes available, go back to patrol
+            if (_stateMachine.PatrolPoints.Count > 0)
+            {
+                _stateMachine.ChangeState(_stateMachine.PatrolState);
                 return;
             }
         }

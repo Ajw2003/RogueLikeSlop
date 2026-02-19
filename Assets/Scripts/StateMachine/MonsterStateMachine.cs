@@ -36,6 +36,7 @@ public class MonsterStateMachine : BaseStateMachine
     public MonsterAttackState AttackState { get; private set; }
     public MonsterIdleState IdleState { get; private set; }
     public MonsterDeadState DeadState { get; private set; }
+    public MonsterPickedUpState PickedUpState { get; private set; }
 
     private void Awake()
     {
@@ -47,6 +48,7 @@ public class MonsterStateMachine : BaseStateMachine
         AttackState = new MonsterAttackState(this);
         IdleState = new MonsterIdleState(this);
         DeadState = new MonsterDeadState(this); // Initialize DeadState
+        PickedUpState = new MonsterPickedUpState(this);
         _health =  maxHealth;
     }
 
@@ -63,6 +65,18 @@ public class MonsterStateMachine : BaseStateMachine
                 PlayerTarget = player.transform;
             }
         }
+    }
+
+    public void PickUp()
+    {
+        ChangeState(PickedUpState);
+    }
+
+    public void Release()
+    {
+        // Transition back to Idle. IdleState logic should handle re-activation 
+        // after landing if desired, or we can add a check for ground.
+        ChangeState(IdleState);
     }
 
     public override void Update()
