@@ -154,6 +154,12 @@ public class ItemManager : SingletonBase<ItemManager>
         }
     }
 
+    // Overload for convenience
+    public void ForceRelease()
+    {
+        StopDragging();
+    }
+
     private void StartDragging(Item item)
     {
         _draggedItem = item;

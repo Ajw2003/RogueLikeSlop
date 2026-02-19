@@ -63,9 +63,9 @@ namespace StateMachine
                 return;
 
             PreviousState = CurrentState as PlayerState;
-            Debug.Log($"Previous State: {PreviousState}");
+            //Debug.Log($"Previous State: {PreviousState}");
             base.ChangeState(newState);
-            Debug.Log($"State Changed to: {CurrentState}");
+            //Debug.Log($"State Changed to: {CurrentState}");
         }
 
         public void Look(Vector2 lookDelta)

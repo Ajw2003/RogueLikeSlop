@@ -18,6 +18,9 @@ namespace StateMachine.States
         {
             base.Enter();
             
+            // Deactivate the Monster logic
+            _stateMachine.Deactivate();
+            
             // Disable navigation
             if (_agent != null)
             {
@@ -31,16 +34,16 @@ namespace StateMachine.States
                 _rb.linearVelocity = Vector3.zero;
                 _rb.angularVelocity = Vector3.zero;
             }
+
+            // Start the struggle timer coroutine on the state machine
+            _stateMachine.StartStruggling();
         }
 
         public override void Exit()
         {
             base.Exit();
-            
-            // Note: We don't re-activate the AI immediately here because 
-            // the monster might still be flying through the air.
-            // Re-activation logic usually happens in the MonsterStateMachine 
-            // or after a landing check.
+            // Stop the struggle timer if we exit for any other reason (like being thrown)
+            _stateMachine.StopStruggling();
         }
 
         public override void Update()

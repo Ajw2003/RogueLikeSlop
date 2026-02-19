@@ -1,3 +1,4 @@
+using StateMachine;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -49,6 +50,7 @@ public class Item : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        
         // Don't deal damage if we're currently being held/dragged
         if (_isDragging) return;
 

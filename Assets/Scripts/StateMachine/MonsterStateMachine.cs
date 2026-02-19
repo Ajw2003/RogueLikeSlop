@@ -26,9 +26,14 @@ public class MonsterStateMachine : BaseStateMachine
     public float AttackRange = 1.5f;
     public float AttackRate = 1.5f; // Seconds between attacks
 
+    [Header("Escape Settings")]
+    public float MinEscapeTime = 2f;
+    public float MaxEscapeTime = 5f;
+
     private NavMeshAgent _agent;
     private float _health;
     public float maxHealth = 100;
+    private Coroutine _struggleCoroutine;
 
     // States
     public MonsterPatrolState PatrolState { get; private set; }
@@ -67,18 +72,6 @@ public class MonsterStateMachine : BaseStateMachine
         }
     }
 
-    public void PickUp()
-    {
-        ChangeState(PickedUpState);
-    }
-
-    public void Release()
-    {
-        // Transition back to Idle. IdleState logic should handle re-activation 
-        // after landing if desired, or we can add a check for ground.
-        ChangeState(IdleState);
-    }
-
     public override void Update()
     {
         if (!_isActive) return;
@@ -107,6 +100,36 @@ public class MonsterStateMachine : BaseStateMachine
         ChangeState(IdleState);
     }
 
+    public void StartStruggling()
+    {
+        StopStruggling();
+        _struggleCoroutine = StartCoroutine(StruggleRoutine());
+    }
+
+    public void StopStruggling()
+    {
+        if (_struggleCoroutine != null)
+        {
+            StopCoroutine(_struggleCoroutine);
+            _struggleCoroutine = null;
+        }
+    }
+
+    private System.Collections.IEnumerator StruggleRoutine()
+    {
+        float waitTime = Random.Range(MinEscapeTime, MaxEscapeTime);
+        yield return new WaitForSeconds(waitTime);
+        
+        Debug.Log($"{gameObject.name} struggled free!");
+        if (ItemManager.Instance != null)
+        {
+            ItemManager.Instance.ForceRelease();
+        }
+        
+        // Ensure state transition
+        Release();
+    }
+
     private void GeneratePatrolPoints()
     {
         PatrolPoints.Clear();
@@ -132,7 +155,6 @@ public class MonsterStateMachine : BaseStateMachine
             return;
 
         base.ChangeState(newState);
-        // Debug.Log removed for performance
     }
 
     public void TakeDamage(float damage)
@@ -150,6 +172,17 @@ public class MonsterStateMachine : BaseStateMachine
     public void Die()
     {
         ChangeState(DeadState); // Transition to DeadState instead of destroying immediately
+    }
+
+    public void PickUp()
+    {
+        ChangeState(PickedUpState);
+    }
+
+    public void Release()
+    {
+        Activate();
+        _agent.enabled = true;
     }
 
     public bool CanSeePlayer()
