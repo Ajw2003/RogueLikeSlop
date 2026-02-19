@@ -568,7 +568,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3196065196339307885, guid: 756825e3188f3034abeb8c77ac8cc128, type: 3}
       propertyPath: MinVelocityForDamage
-      value: 8
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 4083720998800043139, guid: 756825e3188f3034abeb8c77ac8cc128, type: 3}
       propertyPath: m_AnchorMax.y

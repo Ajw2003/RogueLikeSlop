@@ -40,12 +40,14 @@ public class Item : MonoBehaviour
     {
         if (_isDragging)
         {
-            // Move towards target position using physics
-            Vector3 direction = _targetPosition - _rb.position;
-            _rb.linearVelocity = direction * _followSpeed;
+            // Smoothly move towards target position using MovePosition
+            // This is better than linearVelocity for following a point exactly
+            Vector3 newPosition = Vector3.Lerp(_rb.position, _targetPosition, Time.fixedDeltaTime * _followSpeed);
+            _rb.MovePosition(newPosition);
             
-            // Slerp towards target rotation
-            _rb.MoveRotation(Quaternion.Slerp(_rb.rotation, _targetRotation, Time.fixedDeltaTime * _rotationSpeed));
+            // Smoothly rotate towards target rotation
+            Quaternion newRotation = Quaternion.Slerp(_rb.rotation, _targetRotation, Time.fixedDeltaTime * _rotationSpeed);
+            _rb.MoveRotation(newRotation);
         }
     }
 
@@ -81,7 +83,7 @@ public class Item : MonoBehaviour
         if (_monsterAI != null)
         {
             // Only take impact damage if we are NOT grounded/active
-            if (!_agent.enabled || myVelocity > 1f) // Small threshold for "moving"
+            if (!_agent.enabled || myVelocity > 1f) 
             {
                 float currentHealthBefore = _monsterAI.CurrentHealth;
                 _monsterAI.TakeDamage(damage, impactVelocity);
@@ -99,9 +101,15 @@ public class Item : MonoBehaviour
     public void StartDragging()
     {
         _isDragging = true;
+        
+        // Disable gravity and make kinematic to prevent shaking/fighting
+        // But keep MovePosition functional
         _rb.useGravity = false;
         _rb.linearVelocity = Vector3.zero;
         _rb.angularVelocity = Vector3.zero;
+        _rb.isKinematic = true; 
+        
+        
         _targetRotation = transform.rotation;
 
         // Transition to PickedUp state if we are an enemy
@@ -114,18 +122,25 @@ public class Item : MonoBehaviour
     public void StopDragging()
     {
         _isDragging = false;
+        
+        // Re-enable physics
+        _rb.isKinematic = false;
         _rb.useGravity = true;
 
-        // Release the AI from the PickedUp state
+        // Release call removed - Monster handles its own recovery via struggle routine
     }
 
     public void Throw(Vector3 direction, float force)
     {
         _isDragging = false;
+        
+        // Re-enable physics BEFORE applying force
+        _rb.isKinematic = false;
         _rb.useGravity = true;
+        
         _rb.AddForce(direction * force, ForceMode.Impulse);
 
-        // Release the AI from the PickedUp state
+        // Release call removed - Monster handles its own recovery via struggle routine
     }
 
     public void UpdateTargetPosition(Vector3 position)
