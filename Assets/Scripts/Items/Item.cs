@@ -11,6 +11,10 @@ public class Item : MonoBehaviour
     [Header("Physics Settings")]
     [SerializeField] private float _followSpeed = 20f;
     [SerializeField] private float _rotationSpeed = 10f;
+
+    [Header("Damage Settings")]
+    [SerializeField] private float _damageMultiplier = 2f;
+    [SerializeField] private float _minVelocityForDamage = 2f;
     
     private void Awake()
     {
@@ -35,6 +39,33 @@ public class Item : MonoBehaviour
         }
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        // Don't deal damage if we're currently being held/dragged
+        if (_isDragging) return;
+
+        float impactVelocity = collision.relativeVelocity.magnitude;
+
+        if (impactVelocity >= _minVelocityForDamage)
+        {
+            // Calculate damage and convert to integer as requested
+            int damage = Mathf.RoundToInt(impactVelocity * _damageMultiplier);
+            
+            // Try to damage Monster
+            if (collision.gameObject.TryGetComponent(out MonsterStateMachine monster))
+            {
+                monster.TakeDamage(damage);
+                Debug.Log($"Item hit {collision.gameObject.name} for {damage} damage (Velocity: {impactVelocity})");
+            }
+            // Try to damage Player
+            else if (collision.gameObject.TryGetComponent(out StateMachine.PlayerStateMachine player))
+            {
+                player.TakeDamage(damage);
+                Debug.Log($"Item hit Player for {damage} damage (Velocity: {impactVelocity})");
+            }
+        }
+    }
+
     public void StartDragging()
     {
         _isDragging = true;
@@ -43,13 +74,6 @@ public class Item : MonoBehaviour
         _rb.angularVelocity = Vector3.zero;
         _targetRotation = transform.rotation;
     }
-
-    public void UpdateRotation(Quaternion rotation)
-    {
-        _targetRotation = rotation;
-    }
-
-    public Quaternion TargetRotation => _targetRotation;
 
     public void StopDragging()
     {
@@ -68,6 +92,13 @@ public class Item : MonoBehaviour
     {
         _targetPosition = position;
     }
+
+    public void UpdateRotation(Quaternion rotation)
+    {
+        _targetRotation = rotation;
+    }
+
+    public Quaternion TargetRotation => _targetRotation;
 
     public bool IsDragging => _isDragging;
 }
