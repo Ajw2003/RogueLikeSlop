@@ -2,9 +2,9 @@ using Code.Scripts.Singleton;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class InventoryManager : SingletonBase<InventoryManager>
+public class ItemManager : SingletonBase<ItemManager>
 {
-    [SerializeField] private LayerMask _inventoryLayerMask = -1; // Default to all layers, should be set to "Inventory" layer
+    [SerializeField] private LayerMask _itemLayerMask = -1; // Default to all layers, should be set to "Item" layer
     [SerializeField] private float _dragDistance = 5f;
     [SerializeField] private float _scrollSpeed = 25f; // Increased speed for better feel
     [SerializeField] private float _minDragDepth = 0.5f;
@@ -14,8 +14,8 @@ public class InventoryManager : SingletonBase<InventoryManager>
     [SerializeField] private float _rotationSensitivity = 0.5f;
     [SerializeField] private float _throwForce = 15f;
     
-    private InventoryItem _hoveredItem;
-    private InventoryItem _draggedItem;
+    private Item _hoveredItem;
+    private Item _draggedItem;
     private Camera _mainCamera;
     private float _currentDragDepth;
     
@@ -115,9 +115,9 @@ public class InventoryManager : SingletonBase<InventoryManager>
         Vector2 mousePos = Mouse.current.position.ReadValue();
         Ray ray = _mainCamera.ScreenPointToRay(mousePos);
         
-        if (Physics.Raycast(ray, out RaycastHit hit, _raycastDistance, _inventoryLayerMask))
+        if (Physics.Raycast(ray, out RaycastHit hit, _raycastDistance, _itemLayerMask))
         {
-            if (hit.collider.TryGetComponent(out InventoryItem item))
+            if (hit.collider.TryGetComponent(out Item item))
             {
                 _hoveredItem = item;
             }
@@ -154,7 +154,7 @@ public class InventoryManager : SingletonBase<InventoryManager>
         }
     }
 
-    private void StartDragging(InventoryItem item)
+    private void StartDragging(Item item)
     {
         _draggedItem = item;
         _draggedItem.StartDragging();
@@ -173,5 +173,5 @@ public class InventoryManager : SingletonBase<InventoryManager>
         }
     }
 
-    public InventoryItem HoveredItem => _hoveredItem;
+    public Item HoveredItem => _hoveredItem;
 }

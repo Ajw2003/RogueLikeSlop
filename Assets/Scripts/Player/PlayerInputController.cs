@@ -29,8 +29,8 @@ namespace Player
 
        private void Update()
        {
-           // Lock player rotation if we are currently rotating an inventory item
-           if (InventoryManager.Instance != null && InventoryManager.Instance.IsRotatingObject)
+           // Lock player rotation if we are currently rotating an item
+           if (ItemManager.Instance != null && ItemManager.Instance.IsRotatingObject)
            {
                _stateMachine.Look(Vector2.zero);
                return;
@@ -73,25 +73,25 @@ namespace Player
        }
        
 
-       private void InventoryInputs(bool enable)
+       private void ItemInteractionInputs(bool enable)
        {
            if (enable)
            {
                _input.Inventory.Enable();
-               _input.Inventory.Clicked.started += OnClickedPerformed;
-               _input.Inventory.Clicked.canceled += OnClickedPerformed;
+               _input.Inventory.Clicked.started += OnItemClickedPerformed;
+               _input.Inventory.Clicked.canceled += OnItemClickedPerformed;
            }
            else
            {
-               _input.Inventory.Clicked.started -= OnClickedPerformed;
-               _input.Inventory.Clicked.canceled -= OnClickedPerformed;
+               _input.Inventory.Clicked.started -= OnItemClickedPerformed;
+               _input.Inventory.Clicked.canceled -= OnItemClickedPerformed;
                _input.Inventory.Disable();
            }
        }
 
-       private void OnClickedPerformed(InputAction.CallbackContext context)
+       private void OnItemClickedPerformed(InputAction.CallbackContext context)
        {
-           InventoryManager.Instance.OnInventoryClicked(context);
+           ItemManager.Instance.OnInventoryClicked(context);
        }
        
        private void OnMovePerformed(InputAction.CallbackContext context)
@@ -242,6 +242,7 @@ namespace Player
            AttackInputs(false);
            LookInputs(false);
            OpenInventoryInput(false);
+           ItemInteractionInputs(false);
        }
 
        private void EnableAllInputs()
@@ -257,7 +258,7 @@ namespace Player
            JumpInputs(true);
            AttackInputs(true);
            LookInputs(true);
-           InventoryInputs(true);
+           ItemInteractionInputs(true);
        }
     }
 }

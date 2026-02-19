@@ -1,12 +1,11 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class InventoryItem : MonoBehaviour
+public class Item : MonoBehaviour
 {
     private Rigidbody _rb;
     private bool _isDragging = false;
     private Vector3 _targetPosition;
-    
     private Quaternion _targetRotation = Quaternion.identity;
     
     [Header("Physics Settings")]
