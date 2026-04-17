@@ -23,6 +23,8 @@ namespace StateMachine
         
         public PlayerJumpState JumpState { get; set; }
         
+        public SpellBook SpellBook { get; set; }
+        
         public Vector2 MovementDirection { get; set; }
 
         public Rigidbody _rb;
@@ -133,6 +135,20 @@ namespace StateMachine
         private void Start()
         {
             ChangeState(IdleState);
+            AssignSpellBook(null);
+
+        }
+
+        public void AssignSpellBook(SpellBook spellBook)
+        {
+            if (spellBook == null)
+            {
+                SpellBook = GetComponent<SpellBook>();
+            }
+            else
+            {
+                SpellBook = spellBook;
+            }
             
         }
 
@@ -246,6 +262,8 @@ namespace StateMachine
         public void Attack()
         {
             ChangeState(AttackState);
+            SpellBook.CastSpell();
+            
         }
 
         public void Invunerable()
