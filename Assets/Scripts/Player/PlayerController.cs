@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class RawMathController : MonoBehaviour
+public class RawMathPlayerController : MonoBehaviour
 {
     [Header("References")]
     [Tooltip("Assign the Main Camera child object here.")]
@@ -9,10 +9,6 @@ public class RawMathController : MonoBehaviour
     [Header("Settings")]
     public float moveSpeed = 5f;
     public float mouseSensitivity = 2f;
-
-    [Header("Tracking")]
-    public Vector2 trackedVector;
-    private const float multiplierPerDegree = 0.01111f;
 
     // Track our exact viewing angles manually
     private float pitch = 0f; // Vertical rotation (Up/Down)
@@ -29,30 +25,27 @@ public class RawMathController : MonoBehaviour
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
 
-        // Update the tracked vector per your specific requirement
-        trackedVector.x += mouseX * multiplierPerDegree;
-        trackedVector.y += mouseY * multiplierPerDegree;
-
         // Update raw viewing angles
-        yaw += mouseX;
-        pitch = Mathf.Clamp(pitch - mouseY, -90f, 90f);
+        yaw += mouseX; 
+        pitch = Mathf.Clamp(pitch - mouseY, -90f, 90f);// clamp up and down rotation so you can't snap your neck
 
         // Apply both Pitch and Yaw directly to the camera object so you can look around.
-        // We aren't rotating the player's body at all anymore.
         playerCamera.localRotation = Quaternion.Euler(pitch, yaw, 0f);
 
 
         // --- 2. RAW MATH MOVEMENT ---
         // Get raw WASD/Joystick input
-        float inputX = Input.GetAxis("Horizontal"); // Left/Right (X)
+        float  inputX = Input.GetAxis("Horizontal"); // Left/Right (X)
         float inputY = Input.GetAxis("Vertical");   // Forward/Back (Z)
 
-        // Convert the accumulated yaw to radians for C# Mathf functions
+        // Convert the yaw / rotation into radian form to be used in our vector2 calculations
         float yawRad = yaw * Mathf.Deg2Rad;
+        //sin and cos calculations to translate 
         float cos = Mathf.Cos(yawRad);
         float sin = Mathf.Sin(yawRad);
 
         // Apply the 2D Rotation Matrix adapted for Unity's coordinate system
+        // mixes the players WASD inputs with the yaw input 
         float rotatedX = inputX * cos + inputY * sin;
         float rotatedZ = -inputX * sin + inputY * cos;
 
@@ -60,6 +53,6 @@ public class RawMathController : MonoBehaviour
         Vector3 moveDirection = new Vector3(rotatedX, 0f, rotatedZ);
 
         // Move the player manually by altering their absolute world position
-        transform.position += moveDirection * moveSpeed * Time.deltaTime;
+        transform.position += moveDirection * (moveSpeed * Time.deltaTime);
     }
 }
