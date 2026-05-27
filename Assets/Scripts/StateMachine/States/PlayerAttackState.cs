@@ -12,7 +12,7 @@ namespace StateMachine.States
 
         public override void Enter()
         {
-            Collider[] hitEnemies = Physics.OverlapSphere(_stateMachine.AttackPoint.position, _stateMachine.AttackRange, _stateMachine.EnemyLayers);
+            /*Collider[] hitEnemies = Physics.OverlapSphere(_stateMachine.AttackPoint.position, _stateMachine.AttackRange, _stateMachine.EnemyLayers);
 
             foreach (Collider enemy in hitEnemies)
             {
@@ -26,7 +26,7 @@ namespace StateMachine.States
             {
                 await Task.Delay(100);
                 Exit();
-            });
+            });*/
         }
 
         public override void Exit()

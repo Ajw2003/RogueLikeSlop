@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d4632b0901cbe0a408bd29a46aee2691, type: 3}
-  m_Name: Base
+  m_Name: Machine
   m_EditorClassIdentifier: Assembly-CSharp::SpellStats
-  fireRate: 3
+  fireRate: 1
   minSpread: 0.01
-  maxSpread: 0.015
-  reloadTime: 1
+  maxSpread: 0.02
+  reloadTime: 0.1
   projectileForce: 25
-  lifeTime: 3
-  projectileSize: 1
-  damage: 25
+  lifeTime: 2
+  projectileSize: 0.1
+  damage: 5
   numberOfProjectiles: 1
   isHoming: 0
   projectilePrefab: {fileID: 4606373765748771011, guid: b3049e876a5558b4e90b9770074a71e8, type: 3}

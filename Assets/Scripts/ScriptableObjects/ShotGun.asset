@@ -13,11 +13,12 @@ MonoBehaviour:
   m_Name: ShotGun
   m_EditorClassIdentifier: Assembly-CSharp::SpellStats
   fireRate: 1
-  minSpread: 3
-  maxSpread: 5
+  minSpread: 0.01
+  maxSpread: 0.1
   reloadTime: 1
   projectileForce: 25
   lifeTime: 3
+  projectileSize: 0.1
   damage: 5
   numberOfProjectiles: 3
   isHoming: 0

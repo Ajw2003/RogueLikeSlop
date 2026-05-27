@@ -9,6 +9,7 @@ public class SpellStats : ScriptableObject
     public float reloadTime;
     public float projectileForce;
     public float lifeTime;
+    public float projectileSize;
     
     public int damage;
     public int numberOfProjectiles;

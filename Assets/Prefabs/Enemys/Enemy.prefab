@@ -248,7 +248,7 @@ MonoBehaviour:
   CurrentPatrolPointIndex: 0
   PatrolPointReachedThreshold: 0.1
   PatrolRadius: 10
-  PatrolPointCount: 9
+  PatrolPointCount: 3
   VisionRange: 15
   VisionAngle: 110
   VisionBlockingLayers:
@@ -259,6 +259,8 @@ MonoBehaviour:
   AttackRate: 1.5
   MinEscapeTime: 2
   MaxEscapeTime: 5
+  MinVelocityForDamage: 12
+  agent: {fileID: 0}
   maxHealth: 100
   ShowDebugGizmos: 0
 --- !u!195 &2495562083171233322
@@ -325,7 +327,7 @@ MonoBehaviour:
   _followSpeed: 20
   _rotationSpeed: 10
   _damageMultiplier: 2
-  _minVelocityForDamage: 2
+  _damageCooldown: 0.5
 --- !u!1 &2892989118190999583
 GameObject:
   m_ObjectHideFlags: 0
@@ -506,7 +508,7 @@ MonoBehaviour:
   monsterStateMachine: {fileID: 3196065196339307885}
   activationRadius: 25
   deactivationRadius: 50
-  showDebugGizmos: 0
+  showDebugGizmos: 1
 --- !u!1 &4553632902164051005
 GameObject:
   m_ObjectHideFlags: 0

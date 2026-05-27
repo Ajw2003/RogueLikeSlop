@@ -10,6 +10,7 @@ public class SpellBook : MonoBehaviour
     private float _maxSpread;
     private float _reloadTime;
     private float _projectileForce;
+    private float _projectileSize;
     
     private int _damage;
     private int _numberOfProjectiles;
@@ -21,7 +22,7 @@ public class SpellBook : MonoBehaviour
     
     private GameObject _projectilePrefab;
     
-    [SerializeField] private SpellStats spellStats;
+    public SpellStats spellStats;
     [SerializeField] private Camera playerCamera;
     [SerializeField] private Transform shootPoint;
     
@@ -34,7 +35,7 @@ public class SpellBook : MonoBehaviour
         _playerColliders = gameObject.GetComponentsInChildren<Collider>();
     }
 
-    private void AssignStats()
+    public void AssignStats()
     {
         _fireRate = spellStats.fireRate;
         _minSpread = spellStats.minSpread;
@@ -45,7 +46,10 @@ public class SpellBook : MonoBehaviour
         _numberOfProjectiles = spellStats.numberOfProjectiles;
         _projectilePrefab = spellStats.projectilePrefab;
         _isHoming = spellStats.isHoming;
+        _projectileSize = spellStats.projectileSize;
         _projectilePrefab.GetComponent<NetworkedProjectile>().lifeTime = spellStats.lifeTime;
+        _projectilePrefab.GetComponent<NetworkedProjectile>().Damage = spellStats.damage;
+        _projectilePrefab.transform.localScale = new Vector3(spellStats.projectileSize, spellStats.projectileSize, spellStats.projectileSize);
         
     }
     
@@ -77,6 +81,14 @@ public class SpellBook : MonoBehaviour
         {
             for (int i = 0; i < _numberOfProjectiles; i++)
             {
+                float currentSpread = Random.Range(_minSpread, _maxSpread);
+        
+                // Create a random variation vector
+                Vector3 spreadOffset = Random.insideUnitSphere * currentSpread;
+        
+                // Apply spread to the base direction and re-normalize
+                Vector3 finalDirection = (shootDirection + spreadOffset).normalized;
+                shootDirection = finalDirection;
                 var projectilePrefabInstance =  Instantiate(_projectilePrefab, shootPoint.position, Quaternion.LookRotation(shootDirection));
                 var tempCollider =  projectilePrefabInstance.gameObject.GetComponent<Collider>();
                 foreach (var playerCollider in _playerColliders)
@@ -91,6 +103,14 @@ public class SpellBook : MonoBehaviour
         }
         else
         {
+            float currentSpread = Random.Range(_minSpread, _maxSpread);
+        
+            // Create a random variation vector
+            Vector3 spreadOffset = Random.insideUnitSphere * currentSpread;
+        
+            // Apply spread to the base direction and re-normalize
+            Vector3 finalDirection = (shootDirection + spreadOffset).normalized;
+            shootDirection = finalDirection;
             var projectilePrefabInstance =  Instantiate(_projectilePrefab, shootPoint.position, Quaternion.LookRotation(shootDirection));
             var tempCollider =  projectilePrefabInstance.gameObject.GetComponent<Collider>();
             foreach (var playerCollider in _playerColliders)

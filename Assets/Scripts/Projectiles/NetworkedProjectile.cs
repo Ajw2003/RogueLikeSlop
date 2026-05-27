@@ -6,8 +6,14 @@ using UnityEngine;
 public class NetworkedProjectile : NetworkBehaviour
 {
     public float lifeTime = 3f;
+
+    public int Damage;
     private void OnCollisionEnter(Collision other)
     {
+        if (other.gameObject.GetComponent<MonsterStateMachine>())
+        {
+            other.gameObject.GetComponent<MonsterStateMachine>().TakeDamage(Damage);
+        }
         DestroySelf();
     }
 
