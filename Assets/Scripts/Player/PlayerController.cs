@@ -78,11 +78,10 @@ public class RawMathPlayerController : MonoBehaviour
 
     void UpdateGravity()
     {
-        // Find nearest gravity source if we don't have one or if we are far from current
+        // 1. Find the nearest gravity source for force direction
         float closestDistance = float.MaxValue;
         GravitySource closestSource = null;
 
-        // Use cached list for better performance
         foreach (var source in allGravitySources)
         {
             if (source == null) continue;
@@ -101,21 +100,34 @@ public class RawMathPlayerController : MonoBehaviour
 
         if (currentGravitySource != null)
         {
-            Vector3 gravityDir = (currentGravitySource.transform.position - transform.position).normalized;
-            Vector3 upDir = -gravityDir;
+            // The 'down' force direction comes from the gravity source
+            Vector3 gravityForceDir = currentGravitySource.GetGravityDirection(transform.position);
+            Vector3 upDir = -gravityForceDir;
 
-            // Align player up with surface normal
-            Quaternion targetRotation = Quaternion.FromToRotation(transform.up, upDir) * transform.rotation;
+            // 2. Determine alignment (Up direction)
+            // Try to find the surface normal below the player for better alignment on slopes/flat surfaces
+            RaycastHit hit;
+            Vector3 targetUp = upDir;
+            
+            // Raycast further than the grounding check to "anticipate" surface changes
+            if (Physics.Raycast(transform.position, gravityForceDir, out hit, 2.0f))
+            {
+                // Align to the actual surface normal
+                targetUp = hit.normal;
+            }
+
+            // Smoothly rotate the player to align with the target up vector
+            Quaternion targetRotation = Quaternion.FromToRotation(transform.up, targetUp) * transform.rotation;
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, alignmentSpeed * Time.deltaTime);
 
-            // Apply gravity
+            // 3. Apply Gravity and Grounding
             if (!isGrounded)
             {
-                verticalVelocity -= gravityStrength * Time.deltaTime;
+                verticalVelocity -= currentGravitySource.gravityStrength * Time.deltaTime;
             }
             else if (verticalVelocity < 0)
             {
-                verticalVelocity = -0.1f; // Small downward force to stay grounded
+                verticalVelocity = -0.1f;
             }
 
             // Jump
@@ -125,18 +137,17 @@ public class RawMathPlayerController : MonoBehaviour
                 isGrounded = false;
             }
 
-            // Move along gravity/jump axis
-            transform.position += upDir * verticalVelocity * Time.deltaTime;
+            // Move along the local vertical axis (relative to current orientation)
+            transform.position += transform.up * verticalVelocity * Time.deltaTime;
 
-            // Simple grounding check
-            RaycastHit hit;
-            if (Physics.Raycast(transform.position, gravityDir, out hit, 1.1f))
+            // Grounding check
+            if (Physics.Raycast(transform.position, -transform.up, out hit, 1.1f))
             {
                 isGrounded = true;
-                // Snap to surface if very close
+                // Snap to surface
                 if (hit.distance < 1.0f)
                 {
-                    transform.position += gravityDir * (hit.distance - 1.0f);
+                    transform.position += -transform.up * (hit.distance - 1.0f);
                 }
             }
             else
@@ -146,10 +157,14 @@ public class RawMathPlayerController : MonoBehaviour
         }
         else
         {
-            // Floating in space logic
-            verticalVelocity *= 0.99f; // Air resistance
+            // Space/Floating fallback
+            verticalVelocity *= 0.99f;
             transform.position += transform.up * verticalVelocity * Time.deltaTime;
             isGrounded = false;
+            
+            // Optional: Default world gravity if totally lost
+            // Vector3 worldDown = Vector3.down;
+            // ...
         }
     }
 

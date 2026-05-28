@@ -244,8 +244,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0dfe206cabd26784086f525196cee651, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GravitySource
+  type: 1
   gravityStrength: 9.81
-  influenceRadius: 50
+  influenceRadius: 17.2
+  localGravityDirection: {x: 0, y: -1, z: 0}
 --- !u!1001 &184315652
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -257,6 +259,10 @@ PrefabInstance:
     - target: {fileID: 197185568749708860, guid: b376a0d2d106ceb45999d492003b8d58, type: 3}
       propertyPath: m_Name
       value: Raw Math
+      objectReference: {fileID: 0}
+    - target: {fileID: 410363048665160535, guid: b376a0d2d106ceb45999d492003b8d58, type: 3}
+      propertyPath: jumpForce
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 410363048665160535, guid: b376a0d2d106ceb45999d492003b8d58, type: 3}
       propertyPath: moveSpeed
@@ -343,8 +349,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0dfe206cabd26784086f525196cee651, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GravitySource
+  type: 0
   gravityStrength: 9.81
-  influenceRadius: 50
+  influenceRadius: 6
+  localGravityDirection: {x: 0, y: -1, z: 0}
 --- !u!135 &461688799
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -432,8 +440,8 @@ Transform:
   m_GameObject: {fileID: 461688797}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.64, y: 20.8, z: 0.91328}
-  m_LocalScale: {x: 6, y: 6, z: 6}
+  m_LocalPosition: {x: 3.24, y: 22.86, z: 0.91328}
+  m_LocalScale: {x: 9, y: 9, z: 9}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -597,8 +605,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0dfe206cabd26784086f525196cee651, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GravitySource
+  type: 0
   gravityStrength: 9.81
-  influenceRadius: 50
+  influenceRadius: 6
+  localGravityDirection: {x: 0, y: -1, z: 0}
 --- !u!135 &1202121441
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -687,7 +697,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 2.07, y: 6.07, z: 0.91328}
-  m_LocalScale: {x: 6, y: 6, z: 6}
+  m_LocalScale: {x: 9, y: 9, z: 9}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -724,8 +734,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0dfe206cabd26784086f525196cee651, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GravitySource
+  type: 0
   gravityStrength: 9.81
-  influenceRadius: 50
+  influenceRadius: 6
+  localGravityDirection: {x: 0, y: -1, z: 0}
 --- !u!135 &1490033070
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -813,8 +825,8 @@ Transform:
   m_GameObject: {fileID: 1490033068}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10.24, y: 12.87, z: 0.91328}
-  m_LocalScale: {x: 6, y: 6, z: 6}
+  m_LocalPosition: {x: 12.33, y: 14.53, z: 0.91328}
+  m_LocalScale: {x: 9, y: 9, z: 9}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
