@@ -1,0 +1,4 @@
+I am using the script called player controller and want to create a system where there are planets and using their
+  gravitational pull to the center the player can walk on all of the surface of the planets, I also want a way for the
+  player to jump or transport between planets. there are many other scripts in this project but they can largely be
+  disregarded, this raw math player controller is the center of this as it uses no physics

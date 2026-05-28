@@ -32,7 +32,7 @@ public class Simple3DPlayerController : MonoBehaviour
         //clamp the y value between 90 and -90 so you cannot break your players neck
         var ClampedY = Mathf.Clamp(mouseY, -90f, 90f);
         //rotate the camera up and down independently from player movement
-        playerCamera.transform.localRotation = Quaternion.Euler(ClampedY, 0f, 0f);
+        playerCamera.transform.localRotation = Quaternion.Euler(-ClampedY, 0f, 0f);
         
         float moveX = Input.GetAxisRaw("Horizontal"); // A/D or Left/Right
         float moveZ = Input.GetAxisRaw("Vertical");   // W/S or Up/Down
