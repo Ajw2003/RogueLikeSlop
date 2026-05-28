@@ -105,49 +105,60 @@ public class RawMathPlayerController : MonoBehaviour
             Vector3 upDir = -gravityForceDir;
 
             // 2. Determine alignment (Up direction)
-            // Try to find the surface normal below the player for better alignment on slopes/flat surfaces
+            // Use a higher start point and a longer ray for smoother detection
             RaycastHit hit;
             Vector3 targetUp = upDir;
+            Vector3 alignmentRayStart = transform.position + transform.up * 0.5f;
             
-            // Raycast further than the grounding check to "anticipate" surface changes
-            if (Physics.Raycast(transform.position, gravityForceDir, out hit, 2.0f))
+            if (Physics.Raycast(alignmentRayStart, -transform.up, out hit, 2.0f))
             {
-                // Align to the actual surface normal
                 targetUp = hit.normal;
             }
 
-            // Smoothly rotate the player to align with the target up vector
+            // Smoothly rotate the player to align with the surface normal
             Quaternion targetRotation = Quaternion.FromToRotation(transform.up, targetUp) * transform.rotation;
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, alignmentSpeed * Time.deltaTime);
 
-            // 3. Apply Gravity and Grounding
-            if (!isGrounded)
-            {
-                verticalVelocity -= currentGravitySource.gravityStrength * Time.deltaTime;
-            }
-            else if (verticalVelocity < 0)
-            {
-                verticalVelocity = -0.1f;
-            }
+            // 3. Jump and Gravity
+            bool jumpPressed = Input.GetButtonDown("Jump");
 
-            // Jump
-            if (isGrounded && Input.GetButtonDown("Jump"))
+            if (isGrounded && jumpPressed)
             {
                 verticalVelocity = jumpForce;
                 isGrounded = false;
             }
 
-            // Move along the local vertical axis (relative to current orientation)
-            transform.position += transform.up * verticalVelocity * Time.deltaTime;
+            if (!isGrounded)
+            {
+                verticalVelocity -= currentGravitySource.gravityStrength * Time.deltaTime;
+                // Move along the local vertical axis only when in air or jumping
+                transform.position += transform.up * verticalVelocity * Time.deltaTime;
+            }
+            else
+            {
+                verticalVelocity = 0;
+            }
 
-            // Grounding check
-            if (Physics.Raycast(transform.position, -transform.up, out hit, 1.1f))
+            // 4. Grounding check and Smooth Snapping
+            // We use a safe offset to avoid starting inside the mesh
+            Vector3 groundRayStart = transform.position + transform.up * 0.5f;
+            if (verticalVelocity <= 0 && Physics.Raycast(groundRayStart, -transform.up, out hit, 1.6f))
             {
                 isGrounded = true;
-                // Snap to surface
-                if (hit.distance < 1.0f)
+                
+                // Calculate the "height error" (how far we are from the target 1.0 distance)
+                float currentHeight = hit.distance - 0.5f;
+                float targetHeight = 1.0f;
+                float error = currentHeight - targetHeight;
+
+                // Smoothly correct the height error instead of hard snapping
+                // This eliminates the high-frequency jitter (camera shake)
+                if (Mathf.Abs(error) > 0.001f)
                 {
-                    transform.position += -transform.up * (hit.distance - 1.0f);
+                    float correction = error * 15f * Time.deltaTime;
+                    // Clamp correction to avoid overshooting
+                    if (Mathf.Abs(correction) > Mathf.Abs(error)) correction = error;
+                    transform.position -= transform.up * correction;
                 }
             }
             else
@@ -161,10 +172,6 @@ public class RawMathPlayerController : MonoBehaviour
             verticalVelocity *= 0.99f;
             transform.position += transform.up * verticalVelocity * Time.deltaTime;
             isGrounded = false;
-            
-            // Optional: Default world gravity if totally lost
-            // Vector3 worldDown = Vector3.down;
-            // ...
         }
     }
 
