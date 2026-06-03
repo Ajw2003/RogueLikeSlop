@@ -180,5 +180,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkedProjectile
   ShowTopMostFoldoutHeaderGroup: 1
-  lifeTime: 3
+  lifeTime: 2
   Damage: 5
