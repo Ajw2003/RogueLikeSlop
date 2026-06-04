@@ -31,7 +31,7 @@ public class StrategyPlayerController : MonoBehaviour
             {
                 target = hit.point;
             }
-        }
+        } 
     }
 
     private void FixedUpdate()

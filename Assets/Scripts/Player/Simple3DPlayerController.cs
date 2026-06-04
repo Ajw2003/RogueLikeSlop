@@ -11,28 +11,19 @@ public class Simple3DPlayerController : MonoBehaviour
     private Rigidbody rb;
     private float mouseX;
     private float mouseY;
-    private Camera playerCamera;
+    public ThirdPersonCameraController thirdPersonCameraController;
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        playerCamera = GetComponentInChildren<Camera>();
-
-        // Locks the mouse cursor to the center of the screen and hides it
-        Cursor.lockState = CursorLockMode.Locked;
+        thirdPersonCameraController = FindFirstObjectByType<ThirdPersonCameraController>();
     }
 
     void Update()
     {
-        // Get horizontal and vertical mouse movement multiplied by time and sensitivity
-        mouseX += Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-        mouseY += Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+        var currentRotation = thirdPersonCameraController.currentRotation;
         
         // Rotate the entire Player GameObject around the Y-axis (Yaw)
-        transform.localRotation = Quaternion.Euler(0f, mouseX, 0f);
-        //clamp the y value between 90 and -90 so you cannot break your players neck
-        var ClampedY = Mathf.Clamp(mouseY, -90f, 90f);
-        //rotate the camera up and down independently from player movement
-        playerCamera.transform.localRotation = Quaternion.Euler(-ClampedY, 0f, 0f);
+        transform.localRotation = Quaternion.Euler(0f, currentRotation.y, 0f);
         
         float moveX = Input.GetAxisRaw("Horizontal"); // A/D or Left/Right
         float moveZ = Input.GetAxisRaw("Vertical");   // W/S or Up/Down
