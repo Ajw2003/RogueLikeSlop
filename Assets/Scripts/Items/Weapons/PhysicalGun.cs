@@ -15,7 +15,7 @@ public class PhysicalGun : MonoBehaviour
 
     [Header("Bolt Settings")]
     public float boltTravelDistance = 0.1f;
-    public float boltUnlockRotation = 45f;
+    public float boltUnlockRotation = -90f;
     public float flickThreshold = 2f; 
     public float pushPullSensitivity = 0.01f;
 
@@ -61,6 +61,7 @@ public class PhysicalGun : MonoBehaviour
 
     private void Reload()
     {
+        //bolt at -20y
         float mouseX = Input.GetAxis("Mouse X");
         float mouseY = Input.GetAxis("Mouse Y");
 
@@ -72,6 +73,7 @@ public class PhysicalGun : MonoBehaviour
                 {
                     _boltState = BoltState.Unlocked;
                     _currentBoltRotation = boltUnlockRotation;
+                    //bolt at -90y
                     Debug.Log("Bolt Unlocked");
                 }
                 break;
@@ -81,7 +83,8 @@ public class PhysicalGun : MonoBehaviour
                 if (mouseX < -flickThreshold && _currentBoltZ <= 0.01f)
                 {
                     _boltState = BoltState.Locked;
-                    _currentBoltRotation = 0f;
+                    _currentBoltRotation = -20f;
+                    //bolt at -20y
                     Debug.Log("Bolt Locked");
                 }
                 // pull mouse back to move bolt to open position
@@ -212,10 +215,10 @@ public class PhysicalGun : MonoBehaviour
         if (boltTransform == null) return;
 
         // Apply rotation for unlocking (around local Z or Y depending on model, let's assume Z for rotation)
-        boltTransform.localRotation = _boltInitialLocalRot * Quaternion.Euler(0, 0, _currentBoltRotation);
+        boltTransform.localRotation = _boltInitialLocalRot * Quaternion.Euler(0, _currentBoltRotation, 0);
         
         // Apply position for pulling back (Z-axis in local space)
-        boltTransform.localPosition = _boltInitialLocalPos + new Vector3(0, 0, -_currentBoltZ);
+        boltTransform.localPosition = _boltInitialLocalPos + new Vector3(0, -_currentBoltZ, 0);
     }
 }
 
