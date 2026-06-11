@@ -14,6 +14,9 @@ public class RawMathPlayerController : MonoBehaviour
     public float jumpForce = 5f;
     public float alignmentSpeed = 10f;
 
+    [Header("Weapon")]
+    public PhysicalGun equippedGun;
+
     [Header("Gravity")]
     public GravitySource currentGravitySource;
     private List<GravitySource> allGravitySources = new List<GravitySource>();
@@ -177,6 +180,9 @@ public class RawMathPlayerController : MonoBehaviour
 
     void HandleRotation()
     {
+        // Don't rotate camera or player if reloading (moving the bolt)
+        if (equippedGun != null && equippedGun.IsReloading) return;
+
         // Mouse Input
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
