@@ -636,6 +636,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 9218007767376471344, guid: b376a0d2d106ceb45999d492003b8d58, type: 3}
   m_PrefabInstance: {fileID: 184315652}
   m_PrefabAsset: {fileID: 0}
+--- !u!20 &821406146 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 6791578335751008021, guid: b376a0d2d106ceb45999d492003b8d58, type: 3}
+  m_PrefabInstance: {fileID: 184315652}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &846845884
 GameObject:
   m_ObjectHideFlags: 0
@@ -1572,7 +1577,7 @@ GameObject:
   - component: {fileID: 1773401696}
   m_Layer: 0
   m_Name: Gun
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1929,6 +1934,7 @@ MonoBehaviour:
   boltTransform: {fileID: 1170556882}
   firePoint: {fileID: 2095526113}
   stats: {fileID: 11400000, guid: f5fc5776d1888974c95c2200835c2938, type: 2}
+  playerCamera: {fileID: 821406146}
   boltTravelDistance: 0.1
   boltUnlockRotation: 45
   flickThreshold: 2

@@ -11,6 +11,7 @@ public class PhysicalGun : MonoBehaviour
     public Transform firePoint;
     [Tooltip("The stats for this weapon.")]
     public SpellStats stats;
+    [SerializeField] private Camera playerCamera;
 
     [Header("Bolt Settings")]
     public float boltTravelDistance = 0.1f;
@@ -22,6 +23,8 @@ public class PhysicalGun : MonoBehaviour
     [SerializeField] private BoltState _boltState = BoltState.Locked;
     [SerializeField] private bool _hasRoundInChamber = false;
     [SerializeField] private bool _hasSpentShell = false;
+
+    private Collider[] _playerColliders;
 
     public bool IsReloading => Input.GetKey(KeyCode.R);
 
@@ -37,6 +40,9 @@ public class PhysicalGun : MonoBehaviour
             _boltInitialLocalPos = boltTransform.localPosition;
             _boltInitialLocalRot = boltTransform.localRotation;
         }
+
+        _playerColliders = transform.root.GetComponentsInChildren<Collider>();
+        if (playerCamera == null) playerCamera = Camera.main;
     }
 
     private void Update()
@@ -150,16 +156,50 @@ public class PhysicalGun : MonoBehaviour
         // instantiate bullet at gun barrel/fire point 
         if (stats != null && stats.projectilePrefab != null)
         {
-            GameObject projectile = Instantiate(stats.projectilePrefab, firePoint.position, firePoint.rotation);
+            Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+            Vector3 targetPoint;
+            if (Physics.Raycast(ray, out RaycastHit hit, 100f))
+            {
+                targetPoint = hit.point;
+            }
+            else
+            {
+                targetPoint = ray.GetPoint(100f);
+            }
+
+            Vector3 shootDirection = (targetPoint - firePoint.position).normalized;
+            float currentSpread = Random.Range(stats.minSpread, stats.maxSpread);
+            Vector3 spreadOffset = Random.insideUnitSphere * currentSpread;
+            shootDirection = (shootDirection + spreadOffset).normalized;
+
+            var projectileInstance = Instantiate(stats.projectilePrefab, firePoint.position, Quaternion.LookRotation(shootDirection));
             
-            // shoot towards where aiming with mouse 
-            Rigidbody rb = projectile.GetComponent<Rigidbody>();
+            // Set stats on projectile (mirroring SpellBook)
+            projectileInstance.transform.localScale = new Vector3(stats.projectileSize, stats.projectileSize, stats.projectileSize);
+            if (projectileInstance.TryGetComponent<NetworkedProjectile>(out var netProj))
+            {
+                netProj.lifeTime = stats.lifeTime;
+                netProj.Damage = stats.damage;
+            }
+
+            // Ignore collisions with player
+            var projCollider = projectileInstance.GetComponent<Collider>();
+            if (projCollider != null)
+            {
+                foreach (var playerCollider in _playerColliders)
+                {
+                    if (playerCollider != null) Physics.IgnoreCollision(projCollider, playerCollider);
+                }
+            }
+
+            // Apply force
+            var rb = projectileInstance.GetComponent<Rigidbody>();
             if (rb != null)
             {
-                rb.AddForce(firePoint.forward * stats.projectileForce, ForceMode.Impulse);
+                rb.isKinematic = false;
+                rb.AddForce(shootDirection * stats.projectileForce, ForceMode.Impulse);
+                Debug.Log($"Fired! Force: {stats.projectileForce}");
             }
-            
-            Debug.Log("Fired!");
         }
         else
         {
