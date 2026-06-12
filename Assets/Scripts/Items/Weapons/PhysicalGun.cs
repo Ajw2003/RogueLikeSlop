@@ -137,7 +137,8 @@ public class PhysicalGun : MonoBehaviour
                         currentAmmoInMag++;
                         reservedAmmoInMag--;
                         loading = true;
-                        _shell = Instantiate(shellPrefab, shellSpawn.localPosition, quaternion.identity, parent: shellSpawn);
+                        // Use world position and rotation for instantiation, then parent it
+                        _shell = Instantiate(shellPrefab, shellSpawn.position, shellSpawn.rotation, shellSpawn);
                         StartCoroutine(LoadAmmoInMag());
                     }
                 }
@@ -159,23 +160,29 @@ public class PhysicalGun : MonoBehaviour
     private IEnumerator LoadAmmoInMag()
     {
         yield return new WaitForSeconds(0.1f);
-        var xpoint = new Vector3(-1, 0,0);
-        float differencex = Vector3.Distance(_shell.transform.position, xpoint);
-        while (differencex > 0.01f)
-        {
-            differencex = Vector3.Distance(_shell.transform.position, xpoint);
-            _shell.transform.position += xpoint * Time.deltaTime;
-        }
-        var ypoint = new Vector3(-1.05f, -0.10f,-0.2f);
-        float differencey = Vector3.Distance(_shell.transform.position, ypoint);
-        while (differencey > 0.01f)
-        {
-            differencey = Vector3.Distance(_shell.transform.position, ypoint);
-            _shell.transform.position += ypoint * Time.deltaTime;
-        }
-        loading = false;
-        yield return null;
+        
+        // Define targets in local space relative to shellSpawn
+        Vector3 target1 = new Vector3(-1f, 0, 0); 
+        Vector3 target2 = new Vector3(-1.05f, -0.2f, -0.25f);
+        float speed = 2f;
 
+        // Move to first local point
+        while (Vector3.Distance(_shell.transform.localPosition, target1) > 0.001f)
+        {
+            _shell.transform.localPosition = Vector3.MoveTowards(_shell.transform.localPosition, target1, speed * Time.deltaTime);
+            yield return null; // This prevents the infinite loop/freeze
+        }
+
+        // Move to second local point
+        while (Vector3.Distance(_shell.transform.localPosition, target2) > 0.001f)
+        {
+            _shell.transform.localPosition = Vector3.MoveTowards(_shell.transform.localPosition, target2, speed * Time.deltaTime);
+            yield return null; // This prevents the infinite loop/freeze
+        }
+
+        loading = false;
+        // The bullet is now "loaded", we can hide it or destroy it
+        Destroy(_shell); 
     }
 
     private void Fire()
