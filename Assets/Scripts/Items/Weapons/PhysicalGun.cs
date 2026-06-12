@@ -1,4 +1,7 @@
+using System.Collections;
+using Unity.Mathematics;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class PhysicalGun : MonoBehaviour
 {
@@ -23,6 +26,9 @@ public class PhysicalGun : MonoBehaviour
     [SerializeField] private BoltState _boltState = BoltState.Locked;
     [SerializeField] private bool _hasRoundInChamber = false;
     [SerializeField] private bool _hasSpentShell = false;
+    [SerializeField] private Transform shellSpawn;
+    [SerializeField] private GameObject shellPrefab;
+    private GameObject _shell;
 
     private Collider[] _playerColliders;
 
@@ -34,6 +40,8 @@ public class PhysicalGun : MonoBehaviour
     private Quaternion _boltInitialLocalRot;
     
     private int currentAmmoInMag = 0;
+    private bool roundInChamber = false;  
+    private bool loading = false;
     
     [SerializeField] private int reservedAmmoInMag = 24;
 
@@ -123,12 +131,14 @@ public class PhysicalGun : MonoBehaviour
                 // click left mouse to load bullet into breach
                 if (Input.GetMouseButtonDown(0))
                 {
-                    if (currentAmmoInMag < magCapacity && reservedAmmoInMag > 0)
+                    if (currentAmmoInMag < magCapacity && reservedAmmoInMag > 0 && !loading)
                     {
-                        _hasRoundInChamber = true;
                         Debug.Log("Round loaded into breach.");
                         currentAmmoInMag++;
                         reservedAmmoInMag--;
+                        loading = true;
+                        _shell = Instantiate(shellPrefab, shellSpawn.localPosition, quaternion.identity, parent: shellSpawn);
+                        StartCoroutine(LoadAmmoInMag());
                     }
                 }
 
@@ -139,23 +149,39 @@ public class PhysicalGun : MonoBehaviour
                 if (_currentBoltZ <= 0.01f)
                 {
                     _boltState = BoltState.Unlocked;
+                    _hasRoundInChamber = true;
                     Debug.Log("Bolt Pushed Forward");
                 }
                 break;
         }
     }
 
+    private IEnumerator LoadAmmoInMag()
+    {
+        yield return new WaitForSeconds(0.1f);
+        var xpoint = new Vector3(-1, 0,0);
+        float differencex = Vector3.Distance(_shell.transform.position, xpoint);
+        while (differencex > 0.01f)
+        {
+            differencex = Vector3.Distance(_shell.transform.position, xpoint);
+            _shell.transform.position += xpoint * Time.deltaTime;
+        }
+        var ypoint = new Vector3(-1.05f, -0.10f,-0.2f);
+        float differencey = Vector3.Distance(_shell.transform.position, ypoint);
+        while (differencey > 0.01f)
+        {
+            differencey = Vector3.Distance(_shell.transform.position, ypoint);
+            _shell.transform.position += ypoint * Time.deltaTime;
+        }
+        loading = false;
+        yield return null;
+
+    }
+
     private void Fire()
     {
-        // check if bolt is locked
-        if (_boltState != BoltState.Locked)
-        {
-            Debug.Log("Cannot fire: Bolt not locked.");
-            return;
-        }
-
         // check if round loaded
-        if (currentAmmoInMag <= 0)
+        if (currentAmmoInMag <= 0 || !_hasRoundInChamber || _boltState != BoltState.Locked)
         {
             // if not loaded play click sound to illustrate not being loaded
             Debug.Log("Click! No round loaded.");

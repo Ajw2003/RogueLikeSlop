@@ -16,7 +16,7 @@ MonoBehaviour:
   minSpread: 0.01
   maxSpread: 0.02
   reloadTime: 0.1
-  projectileForce: 25
+  projectileForce: 100
   lifeTime: 2
   projectileSize: 0.1
   damage: 5
