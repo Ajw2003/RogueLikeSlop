@@ -28,6 +28,7 @@ public class PhysicalGun : MonoBehaviour
     [SerializeField] private bool _hasSpentShell = false;
     [SerializeField] private Transform shellSpawn;
     [SerializeField] private GameObject shellPrefab;
+    [SerializeField] private Transform shellEject;
     private GameObject _shell;
 
     private Collider[] _playerColliders;
@@ -163,8 +164,36 @@ public class PhysicalGun : MonoBehaviour
         
         // Define targets in local space relative to shellSpawn
         Vector3 target1 = new Vector3(-1f, 0, 0); 
-        Vector3 target2 = new Vector3(-1.05f, -0.2f, -0.25f);
-        float speed = 2f;
+        Vector3 target2 = new Vector3(-1.05f, -0.25f, -0.25f);
+        float speed = 5f;
+
+        // Move to first local point
+        while (Vector3.Distance(_shell.transform.localPosition, target1) > 0.001f)
+        {
+            _shell.transform.localPosition = Vector3.MoveTowards(_shell.transform.localPosition, target1, speed * Time.deltaTime);
+            yield return null; // This prevents the infinite loop/freeze
+        }
+
+        // Move to second local point
+        while (Vector3.Distance(_shell.transform.localPosition, target2) > 0.001f)
+        {
+            _shell.transform.localPosition = Vector3.MoveTowards(_shell.transform.localPosition, target2, speed * Time.deltaTime);
+            yield return null; // This prevents the infinite loop/freeze
+        }
+
+        loading = false;
+        // The bullet is now "loaded", we can hide it or destroy it
+        Destroy(_shell); 
+    }
+
+    private IEnumerator EjectRoundInChamber()
+    {
+        yield return new WaitForSeconds(0.1f);
+        
+        // Define targets in local space relative to shellSpawn
+        Vector3 target1 = new Vector3(1f, 0f, -1f); 
+        Vector3 target2 = new Vector3(3f, 0.25f, -2f);
+        float speed = 30f;
 
         // Move to first local point
         while (Vector3.Distance(_shell.transform.localPosition, target1) > 0.001f)
@@ -195,6 +224,10 @@ public class PhysicalGun : MonoBehaviour
             return;
         }
 
+        var shellspawn = boltTransform.position - new Vector3(0f, 0f, 2f);
+        _shell = Instantiate(shellPrefab, shellEject.position, boltTransform.rotation, shellEject);
+        // _shell.transform.localScale = new Vector3(0.1f,0.1f,0.1f);
+        StartCoroutine(EjectRoundInChamber());
         // if loaded consume 1 round of ammo
         _hasRoundInChamber = false;
         _hasSpentShell = true;
