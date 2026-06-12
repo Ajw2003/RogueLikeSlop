@@ -32,6 +32,14 @@ public class PhysicalGun : MonoBehaviour
     private float _currentBoltRotation = 0f;
     private Vector3 _boltInitialLocalPos;
     private Quaternion _boltInitialLocalRot;
+    
+    private int currentAmmoInMag = 0;
+    
+    [SerializeField] private int reservedAmmoInMag = 24;
+
+    public int magCapacity;
+    
+    
 
     private void Start()
     {
@@ -115,10 +123,12 @@ public class PhysicalGun : MonoBehaviour
                 // click left mouse to load bullet into breach
                 if (Input.GetMouseButtonDown(0))
                 {
-                    if (!_hasRoundInChamber)
+                    if (currentAmmoInMag < magCapacity && reservedAmmoInMag > 0)
                     {
                         _hasRoundInChamber = true;
                         Debug.Log("Round loaded into breach.");
+                        currentAmmoInMag++;
+                        reservedAmmoInMag--;
                     }
                 }
 
@@ -145,7 +155,7 @@ public class PhysicalGun : MonoBehaviour
         }
 
         // check if round loaded
-        if (!_hasRoundInChamber)
+        if (currentAmmoInMag <= 0)
         {
             // if not loaded play click sound to illustrate not being loaded
             Debug.Log("Click! No round loaded.");
@@ -155,6 +165,7 @@ public class PhysicalGun : MonoBehaviour
         // if loaded consume 1 round of ammo
         _hasRoundInChamber = false;
         _hasSpentShell = true;
+        currentAmmoInMag--;
 
         // instantiate bullet at gun barrel/fire point 
         if (stats != null && stats.projectilePrefab != null)
@@ -212,10 +223,10 @@ public class PhysicalGun : MonoBehaviour
 
     private void UpdateBoltVisuals()
     {
-        if (boltTransform == null) return;
+        if (boltTransform == null) return; 
 
         // Apply rotation for unlocking (around local Z or Y depending on model, let's assume Z for rotation)
-        boltTransform.localRotation = _boltInitialLocalRot * Quaternion.Euler(0, _currentBoltRotation, 0);
+        boltTransform.localRotation = _boltInitialLocalRot * Quaternion.Euler(0, -_currentBoltRotation, 0);
         
         // Apply position for pulling back (Z-axis in local space)
         boltTransform.localPosition = _boltInitialLocalPos + new Vector3(0, -_currentBoltZ, 0);
